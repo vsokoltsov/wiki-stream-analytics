@@ -9,7 +9,7 @@ wheels/
 # Virtual environments
 .venv
 .env
-.gcp-service-account.json
+gcp-service-account.json
 .terraform
 .terraform.lock.hcl
 terraform.tfvars
