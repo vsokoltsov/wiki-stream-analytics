@@ -3,5 +3,26 @@ name = "wiki-stream-analytics"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = []
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.12.0",
+]
+
+[dependency-groups]
+dev = [
+    "ty>=0.0.15",
+    "watchfiles>=1.1.1",
+]
+processing = [
+    "apache-flink==2.0.1",
+    "requests>=2.32.5",
+]
+producer = [
+    "aiohttp>=3.13.3",
+    "aiokafka>=0.13.0",
+]
+
+[tool.uv.extra-build-dependencies]
+pyarrow = ["setuptools<81"]
+grpcio-tools = ["setuptools<81"]
