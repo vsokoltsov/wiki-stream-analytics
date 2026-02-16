@@ -1,0 +1,78 @@
+version: "3.9"
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - kafka
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"   # host access
+      - "9092:9092"     # internal docker network
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      # two listeners: inside docker and from host
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      # single-node convenience
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    networks:
+      - kafka
+  
+  wiki-producer:
+    build:
+      context: .
+      dockerfile: producer/Dockerfile
+    container_name: wiki-producer
+    depends_on:
+      - kafka-init-topics
+    volumes:
+      - ./producer:/app/producer
+    working_dir: /app
+    networks:
+      - kafka
+    command: python -m watchfiles 'python -m producer.app' /app/producer
+    env_file: .env
+    restart: always
+
+  kafka-init-topics:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka-init-topics
+    depends_on:
+      - kafka
+    entrypoint: ["/bin/bash", "-lc"]
+    command: |
+      set -e
+      echo "Waiting for Kafka..."
+      cub kafka-ready -b kafka:9092 1 60
+
+      echo "Creating topic recentchange_raw..."
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic recentchange_raw --partitions 3 --replication-factor 1
+
+      echo "Done."
+    restart: "no"
+    networks:
+        - kafka
+
+networks:
+  kafka:
+    driver: bridge
