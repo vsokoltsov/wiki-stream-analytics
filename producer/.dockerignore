@@ -1,0 +1,10 @@
+.DS_Store
+gcp-service-account.json
+
+.git
+.venv
+__pycache__/
+*.pyc
+
+*.npz
+*.parquet*
