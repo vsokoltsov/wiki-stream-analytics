@@ -1,3 +1,5 @@
+serviceAccount: projects/$PROJECT_ID/serviceAccounts/cloudbuild-runner@$PROJECT_ID.iam.gserviceaccount.com
+
 steps:
   - name: gcr.io/cloud-builders/docker
     args:
