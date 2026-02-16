@@ -104,6 +104,27 @@ jobs:
         run: |
           gcloud auth configure-docker europe-west3-docker.pkg.dev --quiet
 
+      - name: Debug
+        env:
+          REGION: europe-west3
+          PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+          REPO: ${{ secrets.AR_REPO }}          # e.g. "containers"
+          IMAGE: wiki-producer
+          TAG: ${{ github.sha }}
+        run: |
+          set -eux
+
+          echo "== gcloud identity =="
+          gcloud auth list
+          echo "active account: $(gcloud config get-value account)"
+          echo "project: $(gcloud config get-value project)"
+
+          echo "== buckets in project =="
+          gcloud storage buckets list || true
+
+          echo "== try access default cloudbuild bucket =="
+          gcloud storage ls "gs://${PROJECT_ID}_cloudbuild" || true
+
       - name: Build & Push
         env:
           REGION: europe-west3
@@ -112,4 +133,5 @@ jobs:
           IMAGE: wiki-producer
           TAG: ${{ github.sha }}
         run: |
+          gcloud builds submit --help | sed -n '1,120p'
           gcloud builds submit --config producer/cloudbuild.yaml --substitutions=_TAG=$GITHUB_SHA .
