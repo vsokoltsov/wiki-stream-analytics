@@ -76,4 +76,4 @@ jobs:
         run: uv sync --group producer --group dev --frozen
 
       - name: Run pytest (-m ${{ matrix.marker }})
-        run: uv run pytest ./producer/-m ${{ matrix.marker }} -q
+        run: uv run pytest ./producer/tests/ -m ${{ matrix.marker }} -q
