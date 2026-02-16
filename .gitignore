@@ -9,6 +9,7 @@ wheels/
 # Virtual environments
 .venv
 .env
+.DS_Store
 gcp-service-account.json
 .terraform
 .terraform.lock.hcl
