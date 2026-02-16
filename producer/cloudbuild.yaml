@@ -4,10 +4,10 @@ steps:
       - build
       - -f
       - Dockerfile
-      - --target
-      - api
       - -t
-      - europe-west3-docker.pkg.dev/$PROJECT_ID/wiki-stream-analytics/wiki-stream-analytics-producer:latest
+      - europe-west3-docker.pkg.dev/$PROJECT_ID/wiki-stream-analytics/wiki-stream-analytics-producer:${_TAG}
       - .
 images:
-  - europe-west3-docker.pkg.dev/$PROJECT_ID/wiki-stream-analytics/wiki-stream-analytics-producer:latest
+  - europe-west3-docker.pkg.dev/$PROJECT_ID/wiki-stream-analytics/wiki-stream-analytics-producer:${_TAG}
+substitutions:
+  _TAG: "latest"

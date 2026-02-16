@@ -107,10 +107,11 @@ jobs:
       - name: Debug
         env:
           REGION: europe-west3
-          PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           REPO: ${{ secrets.AR_REPO }}          # e.g. "containers"
           IMAGE: wiki-producer
           TAG: ${{ github.sha }}
+          STAGING_BUCKET: ${{ secrets.STAGING_BUCKET }}
         run: |
           set -eux
 
@@ -128,10 +129,15 @@ jobs:
       - name: Build & Push
         env:
           REGION: europe-west3
-          PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           REPO: ${{ secrets.AR_REPO }}          # e.g. "containers"
           IMAGE: wiki-producer
           TAG: ${{ github.sha }}
+          STAGING_BUCKET: ${{ secrets.STAGING_BUCKET }}
+
         run: |
-          gcloud builds submit --help | sed -n '1,120p'
-          gcloud builds submit --config producer/cloudbuild.yaml --substitutions=_TAG=$GITHUB_SHA .
+          gcloud builds submit \
+          --config producer/cloudbuild.yaml \
+          --gcs-source-staging-dir "gs://${STAGING_BUCKET}/source" \
+          --substitutions=_TAG=$GITHUB_SHA \
+          .
