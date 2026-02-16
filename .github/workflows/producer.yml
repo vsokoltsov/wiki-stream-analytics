@@ -79,6 +79,9 @@ jobs:
         run: uv run pytest ./producer/tests/ -m ${{ matrix.marker }} -q
 
   build:
+    name: Build image
+    environment: prod
+    needs: [lint, tests]
     runs-on: ubuntu-latest
 
     steps:
