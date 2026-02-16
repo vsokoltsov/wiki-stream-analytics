@@ -1,0 +1,4 @@
+project_id      = "YOUR_GCP_PROJECT_ID"
+environment     = "dev"
+region          = "europe-west3"
+zone            = "europe-west3-a"
