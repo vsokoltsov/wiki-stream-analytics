@@ -141,5 +141,5 @@ jobs:
           gcloud builds submit \
           --config producer/cloudbuild.yaml \
           --gcs-source-staging-dir "gs://${STAGING_BUCKET}/source" \
-          --substitutions=_TAG=$GITHUB_SHA \
+          --substitutions=_TAG=$GITHUB_SHA,_IMAGE=$IMAGE \
           .

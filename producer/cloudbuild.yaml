@@ -5,9 +5,10 @@ steps:
       - -f
       - Dockerfile
       - -t
-      - europe-west3-docker.pkg.dev/$PROJECT_ID/wiki-stream-analytics/wiki-stream-analytics-producer:${_TAG}
+      - europe-west3-docker.pkg.dev/$PROJECT_ID/wiki-stream-analytics/${_IMAGE}:${_TAG}
       - .
 images:
-  - europe-west3-docker.pkg.dev/$PROJECT_ID/wiki-stream-analytics/wiki-stream-analytics-producer:${_TAG}
+  - europe-west3-docker.pkg.dev/$PROJECT_ID/wiki-stream-analytics/${_IMAGE}:${_TAG}
 substitutions:
   _TAG: "latest"
+  _IMAGE: "wiki-producer"
