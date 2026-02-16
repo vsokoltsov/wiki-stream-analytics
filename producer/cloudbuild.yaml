@@ -7,7 +7,7 @@ steps:
     args:
       - build
       - -f
-      - Dockerfile
+      - producer/Dockerfile
       - -t
       - europe-west3-docker.pkg.dev/$PROJECT_ID/wiki-stream-analytics/${_IMAGE}:${_TAG}
       - .
