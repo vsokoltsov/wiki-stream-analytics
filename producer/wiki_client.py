@@ -41,7 +41,7 @@ class WikiClient:
         """
         headers = self._default_headers(last_event_id)
         async with aiohttp.ClientSession(
-            timeout=self.timeout, headers=headers
+            timeout=self.client_timeout, headers=headers
         ) as session:
             async with session.get(self.url) as resp:
                 if resp.status == 403:

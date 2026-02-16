@@ -20,7 +20,6 @@ class WikipediaProducerService:
                     try:
                         raw = await resp.content.readline()
                         obj = self._clean_data(raw=raw, current_id=current_id)
-
                         await self.producer.send_and_wait(
                             self.topic_name, json.dumps(obj).encode("utf-8")
                         )
