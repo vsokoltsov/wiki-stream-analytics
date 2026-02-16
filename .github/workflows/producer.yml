@@ -77,3 +77,33 @@ jobs:
 
       - name: Run pytest (-m ${{ matrix.marker }})
         run: uv run pytest ./producer/tests/ -m ${{ matrix.marker }} -q
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.CI_SA_EMAIL }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      # Configure Docker auth for Artifact Registry
+      - name: Configure docker auth
+        run: |
+          gcloud auth configure-docker europe-west3-docker.pkg.dev --quiet
+
+      - name: Build & Push
+        env:
+          REGION: europe-west3
+          PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+          REPO: ${{ secrets.AR_REPO }}          # e.g. "containers"
+          IMAGE: wiki-producer
+          TAG: ${{ github.sha }}
+        run: |
+          gcloud builds submit --config producer/cloudbuild.yaml --substitutions=_TAG=$GITHUB_SHA .
