@@ -1,4 +1,6 @@
 serviceAccount: projects/$PROJECT_ID/serviceAccounts/cloudbuild-runner@$PROJECT_ID.iam.gserviceaccount.com
+options:
+  logging: CLOUD_LOGGING_ONLY
 
 steps:
   - name: gcr.io/cloud-builders/docker
