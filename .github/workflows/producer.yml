@@ -29,7 +29,7 @@ jobs:
           enable-cache: true
 
       - name: Sync dependencies
-        run: uv sync --frozen
+        run: uv sync --group producer --group dev --frozen
 
       - name: Cache uv
         uses: actions/cache@v4
@@ -73,7 +73,7 @@ jobs:
           enable-cache: true
 
       - name: Sync dependencies
-        run: uv sync --frozen
+        run: uv sync --group producer --group dev --frozen
 
       - name: Run pytest (-m ${{ matrix.marker }})
         run: uv run pytest ./producer/-m ${{ matrix.marker }} -q
