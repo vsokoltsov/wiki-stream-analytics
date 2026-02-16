@@ -124,7 +124,9 @@ jobs:
           gcloud storage buckets list || true
 
           echo "== try access default cloudbuild bucket =="
-          gcloud storage ls "gs://${PROJECT_ID}_cloudbuild" || true
+          gcloud storage ls "gs://${STAGING_BUCKET}" || true
+
+          gcloud storage buckets describe "gs://${STAGING_BUCKET}"
 
       - name: Build & Push
         env:
