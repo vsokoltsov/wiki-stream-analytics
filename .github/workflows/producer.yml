@@ -167,6 +167,8 @@ jobs:
           NAMESPACE: ${{ secrets.HELM_NAMESPACE }}
           IMAGE_REPO: europe-west3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/wiki-stream-analytics/wiki-producer
           IMAGE_TAG: ${{ github.sha }}
+          HELM_KUBERNETES_QPS: "50"
+          HELM_KUBERNETES_BURST: "100"
         run: |
           set -eux
 
@@ -179,6 +181,6 @@ jobs:
             --namespace "$NAMESPACE" \
             --set image.repository="$IMAGE_REPO" \
             --set image.tag="$IMAGE_TAG" \
-            --atomic --timeout 5m
+            --timeout 15m --debug
 
           kubectl -n "$NAMESPACE" rollout status deploy/wiki-producer-wiki-producer --timeout=300s
