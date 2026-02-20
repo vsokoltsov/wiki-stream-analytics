@@ -104,30 +104,6 @@ jobs:
         run: |
           gcloud auth configure-docker europe-west3-docker.pkg.dev --quiet
 
-      - name: Debug
-        env:
-          REGION: europe-west3
-          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-          REPO: ${{ secrets.AR_REPO }}          # e.g. "containers"
-          IMAGE: wiki-producer
-          TAG: ${{ github.sha }}
-          STAGING_BUCKET: ${{ secrets.STAGING_BUCKET }}
-        run: |
-          set -eux
-
-          echo "== gcloud identity =="
-          gcloud auth list
-          echo "active account: $(gcloud config get-value account)"
-          echo "project: $(gcloud config get-value project)"
-
-          echo "== buckets in project =="
-          gcloud storage buckets list || true
-
-          echo "== try access default cloudbuild bucket =="
-          gcloud storage ls "gs://${STAGING_BUCKET}" || true
-
-          gcloud storage buckets describe "gs://${STAGING_BUCKET}"
-
       - name: Build & Push
         env:
           REGION: europe-west3
@@ -143,3 +119,39 @@ jobs:
           --gcs-source-staging-dir "gs://${STAGING_BUCKET}/source" \
           --substitutions=_TAG=$GITHUB_SHA,_IMAGE=$IMAGE \
           .
+
+      - name: Get GKE credentials
+        env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          REGION: ${{ secrets.REGION }}         # e.g. europe-west3
+          GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}  # e.g. wiki-gke
+        run: |
+          set -eux
+          gcloud container clusters get-credentials "$GKE_CLUSTER" \
+            --region "$REGION" \
+            --project "$PROJECT_ID"
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Deploy producer with Helm
+        env:
+          NAMESPACE: ${{ secrets.HELM_NAMESPACE }}
+          IMAGE_REPO: europe-west3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/wiki-stream-analytics/wiki-producer
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          set -eux
+
+          # (optional) sanity check
+          kubectl version --client
+          kubectl get ns "$NAMESPACE" || kubectl create ns "$NAMESPACE"
+
+          helm upgrade --install wiki-producer infra/k8s/charts/producer \
+            --namespace "$NAMESPACE" \
+            --set image.repository="$IMAGE_REPO" \
+            --set image.tag="$IMAGE_TAG" \
+            --atomic --timeout 5m
+
+          kubectl -n "$NAMESPACE" rollout status deploy/wiki-producer-wiki-producer --timeout=300s
