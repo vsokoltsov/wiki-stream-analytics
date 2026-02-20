@@ -19,6 +19,14 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
+      volumes:
+        - name: sm-secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: wiki-producer-sm
+
       containers:
         - name: producer
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -26,6 +34,17 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "wiki-producer.fullname" . }}-env
+            - secretRef:
+              name: wiki-producer-secrets
+          volumeMounts:
+            - name: sm-secrets
+              mountPath: /var/secrets
+              readOnly: true
+          env:
+          {{- range $k, $v := .Values.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

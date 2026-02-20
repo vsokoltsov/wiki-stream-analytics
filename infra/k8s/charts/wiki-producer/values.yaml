@@ -15,9 +15,7 @@ env:
   WIKI_SSE_URL: "https://stream.wikimedia.org/v2/stream/recentchange"
   KAFKA_TOPIC: "recentchange_raw"
   WIKI_USER_AGENT: "wiki-stream-analytics/0.1 (contact: you@example.com)"
-
-  # Managed Kafka bootstrap (example placeholder)
-  KAFKA_BOOTSTRAP_SERVERS: "BOOTSTRAP:9092"
+  WIKI_DEFAULT_TIMEOUT: "30"
 
 resources:
   requests:
