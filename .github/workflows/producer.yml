@@ -119,7 +119,13 @@ jobs:
           --gcs-source-staging-dir "gs://${STAGING_BUCKET}/source" \
           --substitutions=_TAG=$GITHUB_SHA,_IMAGE=$IMAGE \
           .
+  deploy:
+    name: Build image
+    environment: prod
+    needs: [build]
+    runs-on: ubuntu-latest
 
+    steps:
       - name: Get GKE credentials
         env:
           PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -148,7 +154,7 @@ jobs:
           kubectl version --client
           kubectl get ns "$NAMESPACE" || kubectl create ns "$NAMESPACE"
 
-          helm upgrade --install wiki-producer infra/k8s/charts/producer \
+          helm upgrade --install wiki-producer infra/k8s/charts/wiki-producer \
             --namespace "$NAMESPACE" \
             --set image.repository="$IMAGE_REPO" \
             --set image.tag="$IMAGE_TAG" \
