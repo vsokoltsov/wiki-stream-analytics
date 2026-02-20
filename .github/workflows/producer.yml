@@ -120,12 +120,28 @@ jobs:
           --substitutions=_TAG=$GITHUB_SHA,_IMAGE=$IMAGE \
           .
   deploy:
-    name: Build image
+    name: Deploy
     environment: prod
     needs: [build]
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.CI_SA_EMAIL }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      # Configure Docker auth for Artifact Registry
+      - name: Configure docker auth
+        run: |
+          gcloud auth configure-docker europe-west3-docker.pkg.dev --quiet
+
       - name: Get GKE credentials
         env:
           PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
