@@ -181,6 +181,7 @@ jobs:
             --namespace "$NAMESPACE" \
             --set image.repository="$IMAGE_REPO" \
             --set image.tag="$IMAGE_TAG" \
+            --set gcp.projectId="${PROJECT_ID}" \
             --timeout 15m --debug
 
           kubectl -n "$NAMESPACE" rollout status deploy/wiki-producer-wiki-producer --timeout=300s
