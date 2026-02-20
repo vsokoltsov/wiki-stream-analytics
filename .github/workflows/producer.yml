@@ -164,6 +164,7 @@ jobs:
 
       - name: Deploy producer with Helm
         env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           NAMESPACE: ${{ secrets.HELM_NAMESPACE }}
           IMAGE_REPO: europe-west3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/wiki-stream-analytics/wiki-producer
           IMAGE_TAG: ${{ github.sha }}
