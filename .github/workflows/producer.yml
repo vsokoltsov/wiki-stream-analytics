@@ -136,6 +136,9 @@ jobs:
           service_account: ${{ secrets.CI_SA_EMAIL }}
 
       - uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: "gke-gcloud-auth-plugin"
+
 
       # Configure Docker auth for Artifact Registry
       - name: Configure docker auth
@@ -143,10 +146,15 @@ jobs:
           gcloud auth configure-docker europe-west3-docker.pkg.dev --quiet
 
       - name: Get GKE credentials
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.REGION }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
         env:
           PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           REGION: ${{ secrets.REGION }}         # e.g. europe-west3
           GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}  # e.g. wiki-gke
+          USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
         run: |
           set -eux
           gcloud container clusters get-credentials "$GKE_CLUSTER" \
