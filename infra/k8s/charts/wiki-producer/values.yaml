@@ -8,8 +8,7 @@ replicaCount: 1
 serviceAccount:
   create: true
   name: producer-sa
-  annotations:
-    iam.gke.io/gcp-service-account: wiki-producer@PROJECT_ID.iam.gserviceaccount.com
+  annotations: {}
 
 env:
   # App config

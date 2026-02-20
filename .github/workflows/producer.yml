@@ -178,6 +178,8 @@ jobs:
           helm dependency build infra/k8s/charts/wiki-producer
 
           helm upgrade --install wiki-producer infra/k8s/charts/wiki-producer \
+            --set serviceAccount.create=false \
+            --set serviceAccount.name=producer-sa
             --namespace "$NAMESPACE" \
             --set image.repository="$IMAGE_REPO" \
             --set image.tag="$IMAGE_TAG" \
