@@ -108,6 +108,21 @@ resource "google_service_account_iam_member" "gha_actas_runner" {
   member             = "serviceAccount:${google_service_account.ci.email}"
 }
 
+# Allow CI to read cluster metadata (needed for get-credentials)
+resource "google_project_iam_member" "gha_gke_viewer" {
+  project = var.project_id
+  role    = "roles/container.clusterViewer"
+  member  = local.gha_ci_sa
+}
+
+# Needed to call container API + generate kubeconfig credentials
+# (in practice, this role avoids a bunch of "permission denied" edges)
+resource "google_project_iam_member" "gha_gke_developer" {
+  project = var.project_id
+  role    = "roles/container.developer"
+  member  = local.gha_ci_sa
+}
+
 resource "google_project_iam_member" "producer_kafka" {
   project = var.project_id
   role    = "roles/managedkafka.client"

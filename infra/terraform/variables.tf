@@ -41,3 +41,8 @@ variable "ci_sa_account_id" {
   type = string
   default = "gha-ci" 
 }
+
+variable "enable_k8s" {
+  type    = bool
+  default = true
+}

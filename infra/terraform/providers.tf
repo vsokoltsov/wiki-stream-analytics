@@ -9,6 +9,14 @@ terraform {
       source  = "hashicorp/google-beta"
       version = ">= 5.30.0"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = ">= 2.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">= 2.0"
+    }
   }
 }
 
@@ -22,12 +30,19 @@ provider "google-beta" {
   region  = var.region
 }
 
+data "google_client_config" "default" {}
+
 provider "kubernetes" {
-  host  = google_container_cluster.gke.endpoint
-  token = data.google_client_config.default.access_token
-  cluster_ca_certificate = base64decode(
-    google_container_cluster.gke.master_auth[0].cluster_ca_certificate
-  )
+  host                   = "https://${google_container_cluster.gke.endpoint}"
+  token                  = data.google_client_config.default.access_token
+  cluster_ca_certificate = base64decode(google_container_cluster.gke.master_auth[0].cluster_ca_certificate)
 }
 
-data "google_client_config" "default" {}
+provider "helm" {
+  kubernetes {
+    host                   = "https://${google_container_cluster.gke.endpoint}"
+    token                  = data.google_client_config.default.access_token
+    cluster_ca_certificate = base64decode(google_container_cluster.gke.master_auth[0].cluster_ca_certificate)
+    load_config_file       = false
+  }
+}

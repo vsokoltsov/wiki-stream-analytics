@@ -24,3 +24,24 @@ resource "google_container_cluster" "gke" {
   depends_on = [google_project_service.gke]
   deletion_protection = false
 }
+
+# Give "cluster-admin" to whoever authenticates as gha-ci via gcloud/kubectl
+# The identity string depends on how GKE maps Google identities.
+# Most commonly it's: user:<EMAIL>
+resource "kubernetes_cluster_role_binding_v1" "gha_cluster_admin" {
+  metadata {
+    name = "gha-ci-cluster-admin"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+  }
+
+  subject {
+    kind      = "User"
+    name      = google_service_account.ci.email
+    api_group = "rbac.authorization.k8s.io"
+  }
+}

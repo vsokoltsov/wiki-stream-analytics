@@ -14,6 +14,8 @@ resource "google_service_account" "producer_sa" {
 }
 
 resource "kubernetes_service_account_v1" "producer" {
+  depends_on = [kubernetes_namespace_v1.wikistream]
+
   metadata {
     name      = "producer-sa"
     namespace = kubernetes_namespace_v1.wikistream.metadata[0].name
