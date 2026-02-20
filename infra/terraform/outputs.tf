@@ -9,3 +9,11 @@ output "ci_service_account_email" {
 output "cloudbuild_staging_bucket_name" {
   value = google_storage_bucket.cloudbuild_staging.name
 }
+
+output "kafka_cluster_name" {
+  value = google_managed_kafka_cluster.kafka.name
+}
+
+output "region" {
+  value = var.region
+}

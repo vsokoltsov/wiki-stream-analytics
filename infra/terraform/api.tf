@@ -19,3 +19,12 @@ resource "google_project_service" "serviceusage" {
   project = var.project_id
   service = "serviceusage.googleapis.com"
 }
+
+resource "google_project_service" "compute" {
+  service = "compute.googleapis.com"
+}
+
+resource "google_project_service" "managedkafka" {
+  project = var.project_id
+  service = "managedkafka.googleapis.com"
+}
