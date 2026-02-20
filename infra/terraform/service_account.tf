@@ -24,3 +24,8 @@ resource "kubernetes_service_account_v1" "producer" {
     }
   }
 }
+
+resource "google_service_account" "gke_nodes" {
+  account_id   = "gke-nodes"
+  display_name = "GKE Nodes SA"
+}
