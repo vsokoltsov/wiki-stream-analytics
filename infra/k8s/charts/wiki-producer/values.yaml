@@ -10,6 +10,9 @@ serviceAccount:
   name: producer-sa
   annotations: {}
 
+gcp:
+  projectId: "wiki-stream-analytics"
+
 env:
   # App config
   WIKI_SSE_URL: "https://stream.wikimedia.org/v2/stream/recentchange"
