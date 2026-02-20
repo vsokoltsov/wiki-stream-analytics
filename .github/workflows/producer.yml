@@ -170,16 +170,12 @@ jobs:
         run: |
           set -eux
 
-          # (optional) sanity check
-          kubectl version --client
-          kubectl get ns "$NAMESPACE" || kubectl create ns "$NAMESPACE"
-
           helm dependency update infra/k8s/charts/wiki-producer
           helm dependency build infra/k8s/charts/wiki-producer
 
           helm upgrade --install wiki-producer infra/k8s/charts/wiki-producer \
             --set serviceAccount.create=false \
-            --set serviceAccount.name=producer-sa
+            --set serviceAccount.name=producer-sa \
             --namespace "$NAMESPACE" \
             --set image.repository="$IMAGE_REPO" \
             --set image.tag="$IMAGE_TAG" \
