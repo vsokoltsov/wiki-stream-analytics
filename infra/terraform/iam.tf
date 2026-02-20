@@ -155,3 +155,9 @@ resource "google_project_iam_member" "gke_nodes_ar_reader" {
   role    = "roles/artifactregistry.reader"
   member  = "serviceAccount:${google_service_account.gke_nodes.email}"
 }
+
+resource "google_project_iam_member" "producer_secret_accessor" {
+  project = var.project_id
+  role    = "roles/secretmanager.secretAccessor"
+  member  = "serviceAccount:${google_service_account.producer_sa.email}"
+}
