@@ -1,0 +1,34 @@
+image:
+  repository: europe-west3-docker.pkg.dev/PROJECT_ID/wiki-stream-analytics/wiki-producer
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+serviceAccount:
+  create: true
+  name: producer-sa
+  annotations:
+    iam.gke.io/gcp-service-account: wiki-producer@PROJECT_ID.iam.gserviceaccount.com
+
+env:
+  # App config
+  WIKI_SSE_URL: "https://stream.wikimedia.org/v2/stream/recentchange"
+  KAFKA_TOPIC: "recentchange_raw"
+  WIKI_USER_AGENT: "wiki-stream-analytics/0.1 (contact: you@example.com)"
+
+  # Managed Kafka bootstrap (example placeholder)
+  KAFKA_BOOTSTRAP_SERVERS: "BOOTSTRAP:9092"
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

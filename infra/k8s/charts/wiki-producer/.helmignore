@@ -1,0 +1,12 @@
+# Never package virtualenvs / caches / large artifacts
+.venv
+*/.venv
+*/__pycache__
+*/*.pyc
+*/*.pyo
+*/*.pyd
+*/.pytest_cache
+*/.mypy_cache
+*/.ruff_cache
+*/.DS_Store
+*/*.log
