@@ -107,3 +107,15 @@ resource "google_service_account_iam_member" "gha_actas_runner" {
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${google_service_account.ci.email}"
 }
+
+resource "google_project_iam_member" "producer_kafka" {
+  project = var.project_id
+  role    = "roles/managedkafka.client"
+  member  = "serviceAccount:${google_service_account.producer_sa.email}"
+}
+
+resource "google_service_account_iam_member" "producer_wi" {
+  service_account_id = google_service_account.producer_sa.name
+  role               = "roles/iam.workloadIdentityUser"
+  member = "serviceAccount:${var.project_id}.svc.id.goog[producer/producer-sa]"
+}

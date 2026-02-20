@@ -28,3 +28,7 @@ resource "google_project_service" "managedkafka" {
   project = var.project_id
   service = "managedkafka.googleapis.com"
 }
+
+resource "google_project_service" "gke" {
+  service = "container.googleapis.com"
+}
