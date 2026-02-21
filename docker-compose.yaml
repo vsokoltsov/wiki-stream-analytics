@@ -73,6 +73,114 @@ services:
     networks:
         - kafka
 
+  jobmanager:
+    build:
+      context: .
+      dockerfile: processing/Dockerfile
+    container_name: flink-jobmanager
+    command: jobmanager
+    working_dir: /app
+    ports:
+      - "8081:8081" # Flink Web UI
+    networks:
+      - kafka
+      - flinknet
+    volumes:
+      # Mount your job code into the container
+      - ./processing/:/app/processing
+      # Mount GCP service account key (simple approach for local dev)
+      - ./secrets:/var/secrets/google:ro
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+        rest.address: 0.0.0.0
+        parallelism.default: 1
+        taskmanager.numberOfTaskSlots: 1
+        web.log.path: /opt/flink/log
+        web.submit.enable: true
+      # Wikimedia SSE
+      WIKI_SSE_URL: "https://stream.wikimedia.org/v2/stream/recentchange"
+      PYTHONPATH: /opt/flink/usrlib
+      # Use a real contact URL/email per Wikimedia policy
+      WIKI_USER_AGENT: "wiki-stream-analytics/0.1 (https://github.com/vsokoltsov; contact: you@example.com)"
+      PYFLINK_CLIENT_EXECUTABLE: /opt/venv/bin/python
+      PYFLINK_PYTHON: /opt/venv/bin/python
+      PYFLINK_DRIVER_PYTHON: /opt/venv/bin/python
+
+      # GCS sink output
+      GCS_SINK_PATH: "gs://YOUR_BUCKET/curated/wikimedia/recentchange"
+
+      # Google credentials (Application Default Credentials via key file)
+      GOOGLE_APPLICATION_CREDENTIALS: "/var/secrets/google/gcp-service-account.json"
+
+  taskmanager:
+    build:
+      context: .
+      dockerfile: processing/Dockerfile
+    container_name: flink-taskmanager
+    command: taskmanager
+    working_dir: /app
+    depends_on:
+      - jobmanager
+    networks:
+      - kafka
+      - flinknet
+    volumes:
+      - ./processing/:/app/processing
+      - ./secrets:/var/secrets/google:ro
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+        taskmanager.host: taskmanager
+        taskmanager.numberOfTaskSlots: 2
+        web.log.path: /opt/flink/log
+        web.submit.enable: true
+      PYFLINK_CLIENT_EXECUTABLE: /opt/venv/bin/python
+      PYTHONPATH: /opt/flink/usrlib
+      PYFLINK_PYTHON: /opt/venv/bin/python
+      PYFLINK_DRIVER_PYTHON: /opt/venv/bin/python
+      GOOGLE_APPLICATION_CREDENTIALS: "/var/secrets/google/gcp-service-account.json"
+
+  job-submitter:
+    build:
+      context: .
+      dockerfile: processing/Dockerfile
+    container_name: flink-job-submitter
+    depends_on:
+      - jobmanager
+      - taskmanager
+    networks:
+      - kafka
+      - flinknet
+    volumes:
+      - ./processing/:/app/processing
+      - ./secrets:/var/secrets/google:ro
+    working_dir: /app
+    env_file: .env
+    environment:
+      PYFLINK_CLIENT_EXECUTABLE: /opt/venv/bin/python
+      PYFLINK_PYTHON: /opt/venv/bin/python
+      PYFLINK_DRIVER_PYTHON: /opt/venv/bin/python
+      GOOGLE_APPLICATION_CREDENTIALS: "/var/secrets/google/gcp-service-account.json"
+      PYTHONPATH: /app/processing
+    # Submit the PyFlink job to the running cluster, then exit.
+    command:
+    - /bin/bash
+    - -lc
+    - |
+      set -euxo pipefail
+      echo "Waiting for Flink REST API..."
+      until curl -sf http://jobmanager:8081/overview >/dev/null; do sleep 2; done
+      echo "Submitting PyFlink job..."
+
+      echo $(pwd)
+      ls -la
+      flink run -m jobmanager:8081 \
+        -pym processing.app \
+        -pyexec /opt/venv/bin/python
+
 networks:
+  flinknet:
+    driver: bridge
   kafka:
     driver: bridge
