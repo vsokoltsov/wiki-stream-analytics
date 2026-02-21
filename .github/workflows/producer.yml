@@ -50,13 +50,13 @@ jobs:
             ${{ runner.os }}-uv-
 
       - name: ty
-        run: make ty
+        run: make ty app=producer
 
       - name: black (check)
-        run: make black
+        run: make black app=producer
 
       - name: ruff
-        run: make ruff
+        run: make ruff app=producer
 
   tests:
     name: Tests
