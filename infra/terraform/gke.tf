@@ -28,7 +28,7 @@ resource "google_container_node_pool" "primary" {
   node_count = 1
 
   node_config {
-    machine_type = "e2-small"
+    machine_type = "e2-medium"
 
     disk_type    = "pd-standard"
     disk_size_gb = 20
@@ -36,6 +36,11 @@ resource "google_container_node_pool" "primary" {
     oauth_scopes = ["https://www.googleapis.com/auth/cloud-platform"]
 
     service_account = google_service_account.gke_nodes.email
+  }
+
+  autoscaling {
+    min_node_count = 3
+    max_node_count = 10
   }
 
   management {
