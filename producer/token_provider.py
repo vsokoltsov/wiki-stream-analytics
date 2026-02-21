@@ -4,6 +4,26 @@ from google.auth.transport.requests import Request
 from aiokafka.abc import AbstractTokenProvider
 
 
+class GcpAccessToken:
+    def __init__(self):
+        self._creds, _ = google.auth.default(
+            scopes=["https://www.googleapis.com/auth/cloud-platform"]
+        )
+        self._req = Request()
+        self._token = None
+        self._exp_ts = 0.0
+
+    def get(self) -> str:
+        now = time.time()
+        if not self._token or now > (self._exp_ts - 60):
+            self._creds.refresh(self._req)
+            self._token = self._creds.token
+            self._exp_ts = (
+                self._creds.expiry.timestamp() if self._creds.expiry else now + 3600
+            )
+        return self._token
+
+
 class GcpAdcTokenProvider(AbstractTokenProvider):
     """
     Returns Google OAuth access tokens from Application Default Credentials (ADC).
