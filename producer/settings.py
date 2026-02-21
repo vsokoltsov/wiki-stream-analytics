@@ -6,6 +6,7 @@ class ProducerSettings(BaseSettings):
     WIKI_SSE_URL: str = "https://stream.wikimedia.org/v2/stream/recentchange"
     KAFKA_BOOTSTRAP_SERVERS: str = "kafka:9092"
     KAFKA_TOPIC: str = "recentchange_raw"
+    KAFKA_MODE: str
     WIKI_USER_AGENT: str
     WIKI_DEFAULT_TIMEOUT: int
 
