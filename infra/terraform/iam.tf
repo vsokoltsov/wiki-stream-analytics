@@ -135,21 +135,18 @@ resource "google_service_account_iam_member" "producer_wi" {
   member = "serviceAccount:${var.project_id}.svc.id.goog[wikistream/producer-sa]"
 }
 
-# чтобы ноды писали логи
 resource "google_project_iam_member" "gke_nodes_log_writer" {
   project = var.project_id
   role    = "roles/logging.logWriter"
   member  = "serviceAccount:${google_service_account.gke_nodes.email}"
 }
 
-# чтобы ноды отправляли метрики
 resource "google_project_iam_member" "gke_nodes_metric_writer" {
   project = var.project_id
   role    = "roles/monitoring.metricWriter"
   member  = "serviceAccount:${google_service_account.gke_nodes.email}"
 }
 
-# чтобы ноды могли pull-ить образы из Artifact Registry
 resource "google_project_iam_member" "gke_nodes_ar_reader" {
   project = var.project_id
   role    = "roles/artifactregistry.reader"
