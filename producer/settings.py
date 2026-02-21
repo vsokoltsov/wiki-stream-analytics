@@ -10,7 +10,7 @@ class ProducerSettings(BaseSettings):
     KAFKA_MODE: str
     WIKI_USER_AGENT: str
     WIKI_DEFAULT_TIMEOUT: int
-    KAFKA_SASL_USERNAME: Optional[str]
+    KAFKA_SASL_USERNAME: Optional[str] = None
 
     model_config = SettingsConfigDict(
         env_file=".env",
