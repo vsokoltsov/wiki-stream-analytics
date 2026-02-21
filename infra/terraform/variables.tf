@@ -46,3 +46,20 @@ variable "enable_k8s" {
   type    = bool
   default = true
 }
+
+variable "location" {
+  type        = string
+  description = "Bucket location"
+  default     = "EU"
+}
+
+variable "bucket_name" {
+  type        = string
+  description = "Globally unique GCS bucket name"
+}
+
+variable "name_prefix" {
+  type        = string
+  description = "Prefix for resource names"
+  default     = "wikistream"
+}

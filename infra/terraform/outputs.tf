@@ -17,3 +17,15 @@ output "kafka_cluster_name" {
 output "region" {
   value = var.region
 }
+
+output "bucket_name" {
+  value = google_storage_bucket.datalake.name
+}
+
+output "pubsub_topic" {
+  value = google_pubsub_topic.datalake_objects.name
+}
+
+output "pubsub_subscription" {
+  value = google_pubsub_subscription.datalake_objects_sub.name
+}

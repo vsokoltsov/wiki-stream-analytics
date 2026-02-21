@@ -37,3 +37,13 @@ resource "google_project_service" "secretmanager" {
   project = var.project_id
   service = "secretmanager.googleapis.com"
 }
+
+resource "google_project_service" "storage" {
+  project = var.project_id
+  service = "storage.googleapis.com"
+}
+
+resource "google_project_service" "pubsub" {
+  project = var.project_id
+  service = "pubsub.googleapis.com"
+}

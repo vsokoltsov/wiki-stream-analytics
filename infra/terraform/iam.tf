@@ -158,3 +158,16 @@ resource "google_project_iam_member" "producer_secret_accessor" {
   role    = "roles/secretmanager.secretAccessor"
   member  = "serviceAccount:${google_service_account.producer_sa.email}"
 }
+
+data "google_storage_project_service_account" "gcs" {
+  project = var.project_id
+  depends_on = [google_project_service.storage]
+}
+
+resource "google_pubsub_topic_iam_member" "allow_gcs_publish" {
+  topic  = google_pubsub_topic.datalake_objects.name
+  role   = "roles/pubsub.publisher"
+  member = "serviceAccount:${data.google_storage_project_service_account.gcs.email_address}"
+
+  depends_on = [google_project_service.pubsub]
+}
