@@ -20,6 +20,7 @@ RUN uv pip compile --group producer --group dev /app/pyproject.toml -o /tmp/req.
  && uv pip install --python /opt/venv/bin/python --no-cache-dir -r /tmp/req.txt \
  && /opt/venv/bin/python -c "import aiohttp; import aiokafka; print('deps ok')"
 
+COPY common/ /app/common/
 COPY producer/ /app/producer/
 
 CMD ["python", "-m", "producer.app"]
