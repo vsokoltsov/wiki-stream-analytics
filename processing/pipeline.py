@@ -1,18 +1,18 @@
-from typing import Optional, Dict, Any
+from typing import Dict
 from dataclasses import dataclass
 from pyflink.datastream.data_stream import DataStream
 from pyflink.table import StreamTableEnvironment
-from pyflink.table import StreamTableEnvironment, Schema, DataTypes, TableDescriptor
+from pyflink.table import Schema, DataTypes, TableDescriptor
 from pyflink.table.table_result import TableResult
 from pyflink.table.expressions import col, call_sql
+
 
 @dataclass
 class DatalakeStreamingPipeline:
     curated_stream: DataStream
     bucket_path: str
     t_env: StreamTableEnvironment
-    descriptor_options: Dict[str,str]
-
+    descriptor_options: Dict[str, str]
 
     def build(self) -> TableResult:
         curated_table = self.t_env.from_data_stream(
@@ -27,11 +27,11 @@ class DatalakeStreamingPipeline:
             .column_by_expression("namespace_id", col("f6"))
             .column_by_expression("dt", col("f7"))
             .column_by_expression("hour", col("f8"))
-            .build()
+            .build(),
         )
 
         self.t_env.create_temporary_view("curated_view", curated_table)
-        
+
         # Sink table (filesystem -> parquet -> GCS)
         sink_descriptor = (
             TableDescriptor.for_connector("filesystem")
@@ -58,10 +58,11 @@ class DatalakeStreamingPipeline:
 
         sink_descriptor = sink_descriptor.build()
 
-            
         self.t_env.create_table("gcs_sink", sink_descriptor)
 
-        event_ts_expr = call_sql("TO_TIMESTAMP_LTZ(CAST(event_ts_seconds * 1000 AS BIGINT), 3)")
+        event_ts_expr = call_sql(
+            "TO_TIMESTAMP_LTZ(CAST(event_ts_seconds * 1000 AS BIGINT), 3)"
+        )
 
         return (
             self.t_env.from_path("curated_view")
@@ -74,7 +75,7 @@ class DatalakeStreamingPipeline:
                 col("title"),
                 col("namespace_id"),
                 col("dt"),
-                col("hour")
+                col("hour"),
             )
             .execute_insert("gcs_sink")
         )

@@ -1,7 +1,5 @@
 import json
-import os
 from datetime import datetime, timezone
-from pyflink.table.expressions import col, call_sql
 
 from pyflink.common import Types, Row
 from pyflink.datastream import StreamExecutionEnvironment
@@ -9,8 +7,7 @@ from pyflink.datastream.connectors.kafka import KafkaSource, KafkaOffsetsInitial
 from pyflink.common.serialization import SimpleStringSchema
 from pyflink.common.watermark_strategy import WatermarkStrategy
 
-from pyflink.table import StreamTableEnvironment, Schema, DataTypes, TableDescriptor
-from pyflink.table.expressions import col
+from pyflink.table import StreamTableEnvironment
 from processing.settings import get_processing_settings
 from processing.pipeline import DatalakeStreamingPipeline
 
@@ -40,15 +37,15 @@ def parse_curated_row(raw: str):
     dt, hour = _dt_hour_from_ts_seconds(ts_int)
 
     return Row(
-        ts_int,                          # event_ts_seconds
-        str(wiki),                       # wiki
-        str(typ),                        # type
-        obj.get("user"),                 # user_name
-        bool(obj.get("bot", False)),     # bot
-        obj.get("title"),                # title
-        obj.get("namespace"),            # namespace_id
-        dt,                              # dt (partition)
-        hour                             # hour (partition)
+        ts_int,  # event_ts_seconds
+        str(wiki),  # wiki
+        str(typ),  # type
+        obj.get("user"),  # user_name
+        bool(obj.get("bot", False)),  # bot
+        obj.get("title"),  # title
+        obj.get("namespace"),  # namespace_id
+        dt,  # dt (partition)
+        hour,  # hour (partition)
     )
 
 
@@ -79,37 +76,35 @@ def main():
         source_name="kafka-raw",
     )
 
-    curated_stream = (
-        raw_stream
-        .map(
-            parse_curated_row,
-            output_type=Types.ROW([
-                Types.INT(),      # event_ts_seconds
-                Types.STRING(),   # wiki
-                Types.STRING(),   # type
-                Types.STRING(),   # user_name
+    curated_stream = raw_stream.map(
+        parse_curated_row,
+        output_type=Types.ROW(
+            [
+                Types.INT(),  # event_ts_seconds
+                Types.STRING(),  # wiki
+                Types.STRING(),  # type
+                Types.STRING(),  # user_name
                 Types.BOOLEAN(),  # bot
-                Types.STRING(),   # title
-                Types.INT(),      # namespace_id
-                Types.STRING(),   # dt
-                Types.STRING(),   # hour
-            ])
-        )
-        .filter(lambda r: r is not None)
-    )
+                Types.STRING(),  # title
+                Types.INT(),  # namespace_id
+                Types.STRING(),  # dt
+                Types.STRING(),  # hour
+            ]
+        ),
+    ).filter(lambda r: r is not None)
     descriptor_options = {
         "sink.rolling-policy.file-size": "128MB",
         "sink.rolling-policy.rollover-interval": "5 min",
         "sink.partition-commit.trigger": "process-time",
         "sink.partition-commit.delay": "1 min",
-        "sink.partition-commit.policy.kind": "success-file"
+        "sink.partition-commit.policy.kind": "success-file",
     }
 
     pipeline = DatalakeStreamingPipeline(
         curated_stream=curated_stream,
         t_env=t_env,
         bucket_path=bucket_path,
-        descriptor_options=descriptor_options
+        descriptor_options=descriptor_options,
     )
 
     table_result = pipeline.build()
