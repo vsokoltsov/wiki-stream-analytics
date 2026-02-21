@@ -1,0 +1,18 @@
+serviceAccount: projects/$PROJECT_ID/serviceAccounts/cloudbuild-runner@$PROJECT_ID.iam.gserviceaccount.com
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - processing/Dockerfile
+      - -t
+      - europe-west3-docker.pkg.dev/$PROJECT_ID/wiki-stream-analytics/${_IMAGE}:${_TAG}
+      - .
+images:
+  - europe-west3-docker.pkg.dev/$PROJECT_ID/wiki-stream-analytics/${_IMAGE}:${_TAG}
+substitutions:
+  _TAG: "latest"
+  _IMAGE: "wiki-processing"
