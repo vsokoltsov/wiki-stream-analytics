@@ -28,6 +28,8 @@ def build_producer(settings: ProducerSettings) -> AIOKafkaProducer:
         ssl_ctx = ssl.create_default_context()
         token = GcpAccessToken().get()
         principal_email = settings.KAFKA_SASL_USERNAME
+        logger.info(msg=f"email: {principal_email}")
+        logger.info(msg=f"password (token): {token}")
 
         return AIOKafkaProducer(
             bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
