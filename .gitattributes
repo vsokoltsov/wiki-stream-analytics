@@ -1,0 +1,8 @@
+processing/jars/kafka-clients-3.9.1.jar filter=lfs diff=lfs merge=lfs -text
+processing/jars/flink-connector-kafka-4.0.1-2.0.jar filter=lfs diff=lfs merge=lfs -text
+processing/jars/flink-gs-fs-hadoop-2.0.1.jar filter=lfs diff=lfs merge=lfs -text
+processing/jars/flink-sql-parquet-2.0.1.jar filter=lfs diff=lfs merge=lfs -text
+processing/jars/hadoop-auth-3.3.6.jar filter=lfs diff=lfs merge=lfs -text
+processing/jars/hadoop-client-api-3.3.6.jar filter=lfs diff=lfs merge=lfs -text
+processing/jars/hadoop-client-runtime-3.3.6.jar filter=lfs diff=lfs merge=lfs -text
+processing/jars/hadoop-common-3.3.6.jar filter=lfs diff=lfs merge=lfs -text
