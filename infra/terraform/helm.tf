@@ -3,6 +3,7 @@ data "http" "gcp_provider_yaml" {
 }
 
 resource "helm_release" "secrets_store_csi" {
+  count = 0
   name       = "csi-secrets-store"
   namespace  = "kube-system"
   repository = "https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts"
@@ -22,6 +23,7 @@ resource "helm_release" "secrets_store_csi" {
 }
 
 resource "kubectl_manifest" "secrets_store_gcp_provider" {
+  count = 0
   yaml_body  = data.http.gcp_provider_yaml.response_body
   depends_on = [helm_release.secrets_store_csi]
 }

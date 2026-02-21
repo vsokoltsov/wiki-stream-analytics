@@ -132,7 +132,7 @@ resource "google_project_iam_member" "producer_kafka" {
 resource "google_service_account_iam_member" "producer_wi" {
   service_account_id = google_service_account.producer_sa.name
   role               = "roles/iam.workloadIdentityUser"
-  member = "serviceAccount:${var.project_id}.svc.id.goog[producer/producer-sa]"
+  member = "serviceAccount:${var.project_id}.svc.id.goog[wikistream/producer-sa]"
 }
 
 # чтобы ноды писали логи
