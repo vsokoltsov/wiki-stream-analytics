@@ -45,7 +45,6 @@ async def main() -> None:
         user_agent=settings.WIKI_USER_AGENT,
         timeout=settings.WIKI_DEFAULT_TIMEOUT,
     )
-    ssl_ctx = ssl.create_default_context()
     producer = build_producer(settings=settings)
     service = WikipediaProducerService(
         topic_name=settings.KAFKA_TOPIC, producer=producer, client=client
