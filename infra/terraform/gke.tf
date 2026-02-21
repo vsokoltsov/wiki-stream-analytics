@@ -11,6 +11,10 @@ resource "google_container_cluster" "gke" {
   workload_identity_config {
     workload_pool = "${var.project_id}.svc.id.goog"
   }
+
+  secret_manager_config {
+    enabled = true
+  }
   
   depends_on = [google_project_service.gke]
   deletion_protection = false
@@ -38,6 +42,7 @@ resource "google_container_node_pool" "primary" {
     auto_repair  = true
     auto_upgrade = true
   }
+  
 }
 
 # Give "cluster-admin" to whoever authenticates as gha-ci via gcloud/kubectl

@@ -10,11 +10,15 @@ resource "google_secret_manager_secret" "wiki_user_agent" {
     auto {
     }
   }
+
+  depends_on = [google_project_service.secretmanager]
 }
 
 resource "google_secret_manager_secret_version" "wiki_user_agent_v1" {
   secret      = google_secret_manager_secret.wiki_user_agent.id
   secret_data = "wiki-stream-analytics/0.1 (https://github.com/your/repo; contact: you@domain)"
+
+  depends_on = [google_project_service.secretmanager]
 }
 
 resource "google_secret_manager_secret" "kafka_bootstrap" {
@@ -36,11 +40,17 @@ resource "google_secret_manager_secret_version" "kafka_bootstrap_v1" {
   secret      = google_secret_manager_secret.kafka_bootstrap.id
   secret_data = local.kafka_bootstrap_plain
 
-  depends_on = [google_managed_kafka_cluster.kafka]
+  depends_on = [
+    google_managed_kafka_cluster.kafka,
+    google_project_service.secretmanager
+  ]
 }
 
 resource "google_secret_manager_secret_version" "kafka_bootstrap_mtls_v1" {
   secret      = google_secret_manager_secret.kafka_bootstrap_mtls.id
   secret_data = local.kafka_bootstrap_mtls
-  depends_on  = [google_managed_kafka_cluster.kafka]
+  depends_on  = [
+    google_managed_kafka_cluster.kafka,
+    google_project_service.secretmanager
+  ]
 }

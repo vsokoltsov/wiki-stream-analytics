@@ -1,6 +1,10 @@
 terraform {
   required_version = ">= 1.6.0"
   required_providers {
+    http = {
+      source  = "hashicorp/http"
+      version = ">= 3.0"
+    }
     google = {
       source  = "hashicorp/google"
       version = ">= 5.30.0"
@@ -16,6 +20,10 @@ terraform {
     helm = {
       source  = "hashicorp/helm"
       version = ">= 2.0"
+    }
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = ">= 1.14.0"
     }
   }
 }
@@ -39,7 +47,7 @@ provider "kubernetes" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = "https://${google_container_cluster.gke.endpoint}"
     token                  = data.google_client_config.default.access_token
     cluster_ca_certificate = base64decode(google_container_cluster.gke.master_auth[0].cluster_ca_certificate)
