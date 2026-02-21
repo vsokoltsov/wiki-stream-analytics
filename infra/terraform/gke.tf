@@ -1,6 +1,7 @@
 resource "google_container_cluster" "gke" {
   name     = "wiki-gke"
   location = var.region
+  provider = google-beta
 
   remove_default_node_pool = true
   initial_node_count       = 1
@@ -13,6 +14,10 @@ resource "google_container_cluster" "gke" {
   }
 
   secret_manager_config {
+    enabled = true
+  }
+
+  secret_sync_config {
     enabled = true
   }
   
