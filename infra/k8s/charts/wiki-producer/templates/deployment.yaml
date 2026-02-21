@@ -33,7 +33,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
             - secretRef:
-              name: wiki-producer-secrets
+                name: wiki-producer-secrets
           volumeMounts:
             - name: sm-secrets
               mountPath: /var/secrets
