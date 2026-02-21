@@ -32,8 +32,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
-            - configMapRef:
-                name: {{ include "wiki-producer.fullname" . }}-env
+            - secretRef:
+              name: wiki-producer-secrets
           volumeMounts:
             - name: sm-secrets
               mountPath: /var/secrets
