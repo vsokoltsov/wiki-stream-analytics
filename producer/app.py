@@ -46,11 +46,7 @@ async def main() -> None:
         timeout=settings.WIKI_DEFAULT_TIMEOUT,
     )
     ssl_ctx = ssl.create_default_context()
-    producer = AIOKafkaProducer(
-        bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
-        security_protocol="SSL",
-        ssl_context=ssl_ctx,
-    )
+    producer = build_producer(settings=settings)
     service = WikipediaProducerService(
         topic_name=settings.KAFKA_TOPIC, producer=producer, client=client
     )
