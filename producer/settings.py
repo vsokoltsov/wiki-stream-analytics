@@ -1,3 +1,4 @@
+from typing import Optional
 from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -9,6 +10,7 @@ class ProducerSettings(BaseSettings):
     KAFKA_MODE: str
     WIKI_USER_AGENT: str
     WIKI_DEFAULT_TIMEOUT: int
+    KAFKA_SASL_USERNAME: Optional[str]
 
     model_config = SettingsConfigDict(
         env_file=".env",

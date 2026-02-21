@@ -5,7 +5,7 @@ import logging
 from typing import Optional
 
 from aiokafka import AIOKafkaProducer
-from producer.settings import get_producer_settings
+from producer.settings import get_producer_settings, ProducerSettings
 from producer.service import WikipediaProducerService
 from producer.wiki_client import WikiClient
 from producer.token_provider import GcpAdcTokenProvider, GcpAccessToken
@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("wiki-producer")
 
 
-def build_producer(settings) -> AIOKafkaProducer:
+def build_producer(settings: ProducerSettings) -> AIOKafkaProducer:
     mode = (
         getattr(settings, "KAFKA_MODE", None) or os.getenv("KAFKA_MODE", "PLAINTEXT")
     ).upper()
@@ -27,6 +27,7 @@ def build_producer(settings) -> AIOKafkaProducer:
     if mode == "GCP_OAUTH":
         ssl_ctx = ssl.create_default_context()
         token = GcpAccessToken().get()
+        principal_email = settings.KAFKA_SASL_USERNAME
 
         return AIOKafkaProducer(
             bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
@@ -34,7 +35,7 @@ def build_producer(settings) -> AIOKafkaProducer:
             ssl_context=ssl_ctx,
             sasl_mechanism="PLAIN",
             sasl_oauth_token_provider=GcpAdcTokenProvider(),
-            sasl_plain_username="oauth2",
+            sasl_plain_username=principal_email,
             sasl_plain_password=token,
         )
 

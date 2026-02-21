@@ -54,3 +54,22 @@ resource "google_secret_manager_secret_version" "kafka_bootstrap_mtls_v1" {
     google_project_service.secretmanager
   ]
 }
+
+resource "google_secret_manager_secret" "kafka_sasl_username" {
+  secret_id = "kafka_sasl_username"
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.secretmanager]
+}
+
+resource "google_secret_manager_secret_version" "kafka_sasl_username_v1" {
+  secret      = google_secret_manager_secret.kafka_sasl_username.id
+  secret_data = google_service_account.producer_sa.email
+
+  depends_on = [
+    google_service_account.producer_sa,
+    google_project_service.secretmanager
+  ]
+}
