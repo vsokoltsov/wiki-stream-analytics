@@ -19,6 +19,7 @@ env:
   KAFKA_TOPIC: "recentchange_raw"
   WIKI_USER_AGENT: "wiki-stream-analytics/0.1 (contact: you@example.com)"
   WIKI_DEFAULT_TIMEOUT: "30"
+  KAFKA_MODE: "GCP_OAUTH"
 
 resources:
   requests:
