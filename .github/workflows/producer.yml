@@ -3,6 +3,13 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - "producer/**"
+      - "infra/k8s/charts/wiki-producer/**"
+      - ".github/workflows/producer.yml"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "Makefile"
 
 permissions:
   contents: read
