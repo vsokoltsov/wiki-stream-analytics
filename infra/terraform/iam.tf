@@ -129,6 +129,13 @@ resource "google_project_iam_member" "producer_kafka" {
   member  = "serviceAccount:${google_service_account.producer_sa.email}"
 }
 
+
+resource "google_project_iam_member" "processing_kafka" {
+  project = var.project_id
+  role    = "roles/managedkafka.client"
+  member  = "serviceAccount:${google_service_account.processing_sa.email}"
+}
+
 resource "google_service_account_iam_member" "producer_wi" {
   service_account_id = google_service_account.producer_sa.name
   role               = "roles/iam.workloadIdentityUser"

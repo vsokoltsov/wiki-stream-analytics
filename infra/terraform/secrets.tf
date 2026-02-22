@@ -84,7 +84,7 @@ resource "google_secret_manager_secret" "kafka_sasl_username_processing" {
 }
 
 resource "google_secret_manager_secret_version" "kafka_sasl_username_processing_v1" {
-  secret      = google_secret_manager_secret.kafka_sasl_username.id
+  secret      = google_secret_manager_secret.kafka_sasl_username_processing.id
   secret_data = google_service_account.processing_sa.email
 
   depends_on = [
