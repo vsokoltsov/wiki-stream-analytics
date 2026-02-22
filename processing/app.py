@@ -51,9 +51,15 @@ def parse_curated_row(raw: str):
 
 
 def build_kafka_source(settings) -> KafkaSource:
-    mode = (
-        getattr(settings, "KAFKA_MODE", None) or os.getenv("KAFKA_MODE", "PLAINTEXT")
-    ).upper()
+    props = {
+        "security.protocol": "SASL_SSL",
+        "sasl.mechanism": "OAUTHBEARER",
+        "sasl.login.callback.handler.class": "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler",
+        "sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;",
+        "ssl.endpoint.identification.algorithm": "https",
+        "request.timeout.ms": "60000",
+        "default.api.timeout.ms": "60000",
+    }
 
     builder = (
         KafkaSource.builder()
@@ -64,31 +70,16 @@ def build_kafka_source(settings) -> KafkaSource:
         .set_value_only_deserializer(SimpleStringSchema())
     )
 
-    if mode == "PLAINTEXT":
-        return builder.build()
+    for k, v in props.items():
+        builder.set_property(k, v)
 
-    if mode == "GCP_OAUTH":
-        # Java Kafka client properties
-        props = {
-            "security.protocol": "SASL_SSL",
-            "sasl.mechanism": "OAUTHBEARER",
-            "sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;",
-            "sasl.login.callback.handler.class": "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler",
-            "request.timeout.ms": "30000",
-            "default.api.timeout.ms": "30000",
-            "retries": "10",
-            "retry.backoff.ms": "1000",
-        }
-
-        return builder.set_properties(props).build()
-
-    raise ValueError(f"Unknown KAFKA_MODE={mode}. Use PLAINTEXT or GCP_OAUTH.")
+    return builder.build()
 
 
 def main():
     settings = get_processing_settings()
     env = StreamExecutionEnvironment.get_execution_environment()
-    env.set_parallelism(2)
+    env.set_parallelism(1)
 
     env.enable_checkpointing(60_000)
     bucket_path = f"gs://{settings.GCS_BUCKET}/stream"
