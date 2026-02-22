@@ -60,19 +60,15 @@ def build_kafka_source(settings):
         token = GcpAccessToken().get()
         principal_email = settings.KAFKA_SASL_USERNAME  # email сервис-аккаунта
 
-        kafka_props.update(
-            {
+        kafka_props.update({
                 "security.protocol": "SASL_SSL",
-                "sasl.mechanism": "PLAIN",
-                "sasl.jaas.config": (
-                    "org.apache.kafka.common.security.plain.PlainLoginModule required "
-                    f'username="{principal_email}" '
-                    f'password="{token}";'
-                ),
-                # опционально для дебага:
+                "sasl.mechanism": "OAUTHBEARER",
+                "sasl.login.callback.handler.class": "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler",
+                "sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;",
+                # ВАЖНО: username должен совпадать с principal (SA), иначе будет 400/403 как раньше
+                "sasl.oauthbearer.extensions": f"principal={settings.KAFKA_SASL_USERNAME}",
                 "log4j.logger.org.apache.kafka": "DEBUG",
-            }
-        )
+        })
 
     return (
         KafkaSource.builder()
@@ -122,10 +118,11 @@ def main():
         ),
     ).filter(lambda r: r is not None)
     descriptor_options = {
-        "sink.rolling-policy.file-size": "16MB",
-        "sink.rolling-policy.rollover-interval": "5 min",
+        "sink.rolling-policy.file-size": "1MB",
+        "sink.rolling-policy.rollover-interval": "1 min",
+        "sink.rolling-policy.check-interval": "10 s",
         "sink.partition-commit.trigger": "process-time",
-        "sink.partition-commit.delay": "1 min",
+        "sink.partition-commit.delay": "0 s",
         "sink.partition-commit.policy.kind": "success-file",
     }
 
