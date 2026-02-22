@@ -58,7 +58,9 @@ def build_kafka_source(settings):
     if mode == "GCP_OAUTH":
         # как в producer: SASL_SSL + SASL/PLAIN (username=email, password=access_token)
         token = GcpAccessToken().get()
-        principal_email = settings.KAFKA_SASL_USERNAME_PROCESSING  # email сервис-аккаунта
+        principal_email = (
+            settings.KAFKA_SASL_USERNAME_PROCESSING
+        )  # email сервис-аккаунта
 
         kafka_props.update(
             {
