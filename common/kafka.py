@@ -1,8 +1,8 @@
 import os
 import ssl
 from aiokafka import AIOKafkaProducer
-from producer.token_provider import GcpAdcTokenProvider, GcpAccessToken
-from producer.settings import get_producer_settings, ProducerSettings
+from common.token_provider import GcpAdcTokenProvider, GcpAccessToken
+from producer.settings import ProducerSettings
 
 def build_producer(settings: ProducerSettings) -> AIOKafkaProducer:
     mode = (

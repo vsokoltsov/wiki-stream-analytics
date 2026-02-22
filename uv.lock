@@ -1337,6 +1337,8 @@ dev = [
     { name = "watchfiles" },
 ]
 processing = [
+    { name = "aiohttp" },
+    { name = "aiokafka" },
     { name = "apache-flink" },
     { name = "requests" },
 ]
@@ -1364,6 +1366,8 @@ dev = [
     { name = "watchfiles", specifier = ">=1.1.1" },
 ]
 processing = [
+    { name = "aiohttp", specifier = ">=3.13.3" },
+    { name = "aiokafka", specifier = ">=0.13.0" },
     { name = "apache-flink", specifier = "==2.0.1" },
     { name = "requests", specifier = ">=2.32.5" },
 ]

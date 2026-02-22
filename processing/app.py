@@ -10,6 +10,7 @@ from pyflink.common.watermark_strategy import WatermarkStrategy
 from pyflink.table import StreamTableEnvironment
 from processing.settings import get_processing_settings
 from processing.pipeline import DatalakeStreamingPipeline
+from common.token_provider import GcpAdcTokenProvider, GcpAccessToken
 
 
 def _dt_hour_from_ts_seconds(ts_seconds: int) -> tuple[str, str]:
@@ -53,14 +54,22 @@ def build_kafka_source(settings):
     kafka_props = {}
 
     mode = (getattr(settings, "KAFKA_MODE", None) or "PLAINTEXT").upper()
+
     if mode == "GCP_OAUTH":
+        # как в producer: SASL_SSL + SASL/PLAIN (username=email, password=access_token)
+        token = GcpAccessToken().get()
+        principal_email = settings.KAFKA_SASL_USERNAME  # email сервис-аккаунта
+
         kafka_props.update(
             {
                 "security.protocol": "SASL_SSL",
-                "sasl.mechanism": "OAUTHBEARER",
-                "sasl.login.callback.handler.class": "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler",
-                "sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;",
-                # полезно для дебага (потом убрать):
+                "sasl.mechanism": "PLAIN",
+                "sasl.jaas.config": (
+                    "org.apache.kafka.common.security.plain.PlainLoginModule required "
+                    f'username="{principal_email}" '
+                    f'password="{token}";'
+                ),
+                # опционально для дебага:
                 "log4j.logger.org.apache.kafka": "DEBUG",
             }
         )

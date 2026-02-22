@@ -58,6 +58,7 @@ WORKDIR /app
 COPY pyproject.toml /app/pyproject.toml
 COPY uv.lock /app/uv.lock
 COPY processing/ /app/processing/
+COPY common/ /app/common/
 
 RUN /opt/venv/bin/pip install --no-cache-dir "setuptools<81"
 
