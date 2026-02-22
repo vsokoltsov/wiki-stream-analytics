@@ -1,5 +1,4 @@
 import json
-import os
 from datetime import datetime, timezone
 
 from pyflink.common import Types, Row
@@ -50,30 +49,36 @@ def parse_curated_row(raw: str):
     )
 
 
-def build_kafka_source(settings) -> KafkaSource:
-    props = {
-        "security.protocol": "SASL_SSL",
-        "sasl.mechanism": "OAUTHBEARER",
-        "sasl.login.callback.handler.class": "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler",
-        "sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;",
-        "ssl.endpoint.identification.algorithm": "https",
-        "request.timeout.ms": "60000",
-        "default.api.timeout.ms": "60000",
-    }
+def build_kafka_source(settings):
+    kafka_props = {}
 
-    builder = (
+    mode = (getattr(settings, "KAFKA_MODE", None) or "PLAINTEXT").upper()
+    if mode == "GCP_OAUTH":
+        kafka_props.update(
+            {
+                "security.protocol": "SASL_SSL",
+                "sasl.mechanism": "OAUTHBEARER",
+                "sasl.jaas.config": (
+                    "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;"
+                ),
+                "sasl.login.callback.handler.class": (
+                    "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler"
+                ),
+                # полезно для дебага (потом убрать):
+                "log4j.logger.org.apache.kafka": "DEBUG",
+            }
+        )
+
+    return (
         KafkaSource.builder()
         .set_bootstrap_servers(settings.KAFKA_BOOTSTRAP_SERVERS)
         .set_topics(settings.KAFKA_TOPIC)
         .set_group_id(settings.KAFKA_GROUP_ID)
         .set_starting_offsets(KafkaOffsetsInitializer.earliest())
         .set_value_only_deserializer(SimpleStringSchema())
+        .set_properties(kafka_props)
+        .build()
     )
-
-    for k, v in props.items():
-        builder.set_property(k, v)
-
-    return builder.build()
 
 
 def main():
