@@ -17,6 +17,8 @@ spec:
     {{ $k }}: {{ $v | quote }}
 {{- end }}
     taskmanager.numberOfTaskSlots: {{ .Values.flink.taskManager.slots | quote }}
+    taskmanager.memory.process.size: "2048m"
+    jobmanager.memory.process.size: "1024m"
 
   jobManager:
     resource:
@@ -62,7 +64,7 @@ spec:
         - name: flink-main-container
           envFrom:
             - secretRef:
-                name: wiki-processing-secrets
+                name: wiki-processing-secrets-v2
           volumeMounts:
             - name: flink-conf-writable
               mountPath: /tmp/flink-conf
