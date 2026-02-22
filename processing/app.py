@@ -10,7 +10,7 @@ from pyflink.common.watermark_strategy import WatermarkStrategy
 from pyflink.table import StreamTableEnvironment
 from processing.settings import get_processing_settings
 from processing.pipeline import DatalakeStreamingPipeline
-from common.token_provider import GcpAdcTokenProvider, GcpAccessToken
+from common.token_provider import GcpAccessToken
 
 
 def _dt_hour_from_ts_seconds(ts_seconds: int) -> tuple[str, str]:
