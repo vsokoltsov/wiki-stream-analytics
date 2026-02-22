@@ -1,0 +1,71 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: europe-west3-docker.pkg.dev/PROJECT_ID/flink-images/flink-processing
+  tag: dev
+  pullPolicy: IfNotPresent
+
+# If Workload Identity KSA is created by Terraform, set:
+# create: false, name: <existing-ksa-name>
+serviceAccount:
+  create: false
+  name: "flink"
+  # If create=true, you can set the GSA email annotation here
+  gsaEmail: "wiki-processing@PROJECT_ID.iam.gserviceaccount.com"
+
+gcp:
+  projectId: "wiki-stream-analytics"
+
+flink:
+  version: v2_0
+
+  jobManager:
+    cpu: 0.25
+    memory: "1024mb"
+
+  taskManager:
+    replicas: 1
+    cpu: 0.25
+    memory: "1024mb"
+    slots: 1
+
+  configuration:
+    "parallelism.default": "1"
+    "taskmanager.numberOfTaskSlots": "2"
+    "rest.address": "0.0.0.0"
+    "web.submit.enable": "true"
+    "web.log.path": "/opt/flink/log"
+
+pyflink:
+  # Verify actual jar in your image:
+  # kubectl exec ... -- ls -la /opt/flink/opt | grep flink-python
+  pythonJar: "local:///opt/flink/opt/flink-python-2.0.1.jar"
+  entryClass: "org.apache.flink.client.python.PythonDriver"
+  pyClientExec: "/opt/venv/bin/python"
+  pyModule: "processing.app"
+
+env:
+  WIKI_SSE_URL: "https://stream.wikimedia.org/v2/stream/recentchange"
+  WIKI_USER_AGENT: "wiki-stream-analytics/0.1 (https://github.com/vsokoltsov; contact: you@example.com)"
+  PYFLINK_CLIENT_EXECUTABLE: "/opt/venv/bin/python"
+  PYFLINK_PYTHON: "/opt/venv/bin/python"
+  PYFLINK_DRIVER_PYTHON: "/opt/venv/bin/python"
+  PYTHONPATH: "/app"
+  KAFKA_MODE: "GCP_OAUTH"
+  KAFKA_GROUP_ID: wiki-stream-analytics-processing
+  FLINK_CONF_DIR: "/tmp/flink-conf"
+
+ingress:
+  enabled: false
+  className: "nginx"
+  host: "flink-ui.example.com"
+  annotations: {}
+  tls:
+    enabled: false
+    secretName: ""
+
+ui:
+  # Operator creates a REST service named: <flinkDeploymentName>-rest
+  # Typically on port 8081.
+  servicePort: 8081

@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: flink-runner
+  namespace: wikistream
+subjects:
+  - kind: ServiceAccount
+    name: processing-sa
+    namespace: wikistream
+roleRef:
+  kind: Role
+  name: flink-runner
+  apiGroup: rbac.authorization.k8s.io

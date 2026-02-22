@@ -1,0 +1,87 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: {{ include "wiki-processing.fullname" . }}
+  labels:
+{{ include "wiki-processing.labels" . | indent 4 }}
+spec:
+  image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+  imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+
+  flinkVersion: {{ .Values.flink.version | quote }}
+
+  serviceAccount: {{ include "wiki-processing.serviceAccountName" . | quote }}
+
+  flinkConfiguration:
+{{- range $k, $v := .Values.flink.configuration }}
+    {{ $k }}: {{ $v | quote }}
+{{- end }}
+    taskmanager.numberOfTaskSlots: {{ .Values.flink.taskManager.slots | quote }}
+
+  jobManager:
+    resource:
+      cpu: {{ .Values.flink.jobManager.cpu }}
+      memory: {{ .Values.flink.jobManager.memory | quote }}
+
+  taskManager:
+    replicas: {{ .Values.flink.taskManager.replicas }}
+    resource:
+      cpu: {{ .Values.flink.taskManager.cpu }}
+      memory: {{ .Values.flink.taskManager.memory | quote }}
+
+  podTemplate:
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      volumes:
+        - name: flink-conf-writable
+          emptyDir: {}
+
+        - name: sm-secrets
+          csi:
+            driver: secrets-store-gke.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: wiki-processing-sm
+      initContainers:
+        - name: init-flink-conf
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -eux
+              ls -la /flink-conf-ro
+              cp -a /flink-conf-ro/. /flink-conf-rw/
+              ls -la /flink-conf-rw/
+          volumeMounts:
+            - name: flink-config-volume
+              mountPath: /flink-conf-ro
+              readOnly: true
+            - name: flink-conf-writable
+              mountPath: /flink-conf-rw
+      containers:
+        - name: flink-main-container
+          envFrom:
+            - secretRef:
+                name: wiki-processing-secrets
+          volumeMounts:
+            - name: flink-conf-writable
+              mountPath: /tmp/flink-conf
+            - name: sm-secrets
+              mountPath: /var/secrets
+              readOnly: true
+          env:
+          {{- range $k, $v := .Values.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+          {{- end }}
+  job:
+    jarURI: {{ .Values.pyflink.pythonJar | quote }}
+    entryClass: {{ .Values.pyflink.entryClass | quote }}
+    args:
+      - "-pyclientexec"
+      - {{ .Values.pyflink.pyClientExec | quote }}
+      - "-pym"
+      - {{ .Values.pyflink.pyModule | quote }}
+
+    parallelism: {{ (index .Values.flink.configuration "parallelism.default") | default "1" | int }}
+    upgradeMode: "stateless"

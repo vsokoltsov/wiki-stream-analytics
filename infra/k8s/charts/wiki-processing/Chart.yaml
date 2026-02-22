@@ -1,0 +1,6 @@
+apiVersion: v2
+name: wiki-processing
+description: PyFlink app deployed via Apache Flink Kubernetes Operator (FlinkDeployment CR)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
