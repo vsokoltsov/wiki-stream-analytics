@@ -1,0 +1,22 @@
+global:
+  labels: {}
+  annotations: {}
+
+services:
+  - name: flink-ui
+    namespace: wikistream
+    enabled: true
+    selector:
+      app: wiki-processing
+      component: jobmanager
+    ports:
+      - name: http
+        port: 8081
+        targetPort: 8081
+        protocol: TCP
+    loadBalancerIP: ""  # например: "34.xxx.xxx.xxx"
+    loadBalancerSourceRanges: [] # например: ["1.2.3.4/32"]
+    externalTrafficPolicy: Cluster
+    sessionAffinity: None
+    annotations:
+      cloud.google.com/load-balancer-type: "External"
