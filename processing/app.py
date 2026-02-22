@@ -49,8 +49,11 @@ def parse_curated_row(raw: str):
         hour,  # hour (partition)
     )
 
-def build_kafka_source(settings)  -> KafkaSource:
-    mode = (getattr(settings, "KAFKA_MODE", None) or os.getenv("KAFKA_MODE", "PLAINTEXT")).upper()
+
+def build_kafka_source(settings) -> KafkaSource:
+    mode = (
+        getattr(settings, "KAFKA_MODE", None) or os.getenv("KAFKA_MODE", "PLAINTEXT")
+    ).upper()
 
     builder = (
         KafkaSource.builder()
@@ -71,7 +74,6 @@ def build_kafka_source(settings)  -> KafkaSource:
             "sasl.mechanism": "OAUTHBEARER",
             "sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;",
             "sasl.login.callback.handler.class": "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler",
-
             "request.timeout.ms": "30000",
             "default.api.timeout.ms": "30000",
             "retries": "10",
