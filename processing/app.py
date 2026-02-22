@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime, timezone
 
 from pyflink.common import Types, Row
@@ -48,6 +49,39 @@ def parse_curated_row(raw: str):
         hour,  # hour (partition)
     )
 
+def build_kafka_source(settings)  -> KafkaSource:
+    mode = (getattr(settings, "KAFKA_MODE", None) or os.getenv("KAFKA_MODE", "PLAINTEXT")).upper()
+
+    builder = (
+        KafkaSource.builder()
+        .set_bootstrap_servers(settings.KAFKA_BOOTSTRAP_SERVERS)
+        .set_topics(settings.KAFKA_TOPIC)
+        .set_group_id(settings.KAFKA_GROUP_ID)
+        .set_starting_offsets(KafkaOffsetsInitializer.earliest())
+        .set_value_only_deserializer(SimpleStringSchema())
+    )
+
+    if mode == "PLAINTEXT":
+        return builder.build()
+
+    if mode == "GCP_OAUTH":
+        # Java Kafka client properties
+        props = {
+            "security.protocol": "SASL_SSL",
+            "sasl.mechanism": "OAUTHBEARER",
+            "sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;",
+            "sasl.login.callback.handler.class": "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler",
+
+            "request.timeout.ms": "30000",
+            "default.api.timeout.ms": "30000",
+            "retries": "10",
+            "retry.backoff.ms": "1000",
+        }
+
+        return builder.set_properties(props).build()
+
+    raise ValueError(f"Unknown KAFKA_MODE={mode}. Use PLAINTEXT or GCP_OAUTH.")
+
 
 def main():
     settings = get_processing_settings()
@@ -60,15 +94,7 @@ def main():
     t_env = StreamTableEnvironment.create(env)
 
     # Kafka source
-    source = (
-        KafkaSource.builder()
-        .set_bootstrap_servers(settings.KAFKA_BOOTSTRAP_SERVERS)
-        .set_topics(settings.KAFKA_TOPIC)
-        .set_group_id(settings.KAFKA_GROUP_ID)
-        .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-        .set_value_only_deserializer(SimpleStringSchema())
-        .build()
-    )
+    source = build_kafka_source(settings=settings)
 
     raw_stream = env.from_source(
         source,

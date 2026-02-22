@@ -74,6 +74,7 @@ COPY processing/jars/hadoop-common-3.3.6.jar /opt/flink/lib/
 COPY processing/jars/hadoop-auth-3.3.6.jar /opt/flink/lib/
 COPY processing/jars/hadoop-client-api-3.3.6.jar /opt/flink/lib/
 COPY processing/jars/hadoop-client-runtime-3.3.6.jar /opt/flink/lib/
+COPY processing/jars/managed-kafka-auth-login-handler-1.0.6.jar /opt/flink/lib/
 
 # 2) Put the GCS filesystem plugin into /opt/flink/plugins/gs-fs-hadoop
 #    This is crucial so Flink can resolve the "gs://" scheme.
