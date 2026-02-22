@@ -2,6 +2,12 @@ FROM flink:2.0.1-scala_2.12-java17
 
 USER root
 
+RUN set -eux; \
+    f="/opt/flink/bin/config-parser-utils.sh"; \
+    grep -n "/opt/flink/conf" "$f" || true; \
+    sed -i 's#/opt/flink/conf#${FLINK_CONF_DIR:-/opt/flink/conf}#g' "$f"; \
+    grep -n "FLINK_CONF_DIR" "$f" | head
+
 # Install Python + build tools + full JDK + venv support
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
