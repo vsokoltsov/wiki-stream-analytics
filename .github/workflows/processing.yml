@@ -192,4 +192,4 @@ jobs:
             --set gcp.projectId="${PROJECT_ID}" \
             --timeout 15m --debug
 
-          kubectl -n "$NAMESPACE" rollout status deploy/wiki-processing-wiki-processing --timeout=300s
+          kubectl -n "$NAMESPACE" rollout status deploy/wiki-processing --timeout=300s
