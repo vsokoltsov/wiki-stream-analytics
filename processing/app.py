@@ -58,12 +58,8 @@ def build_kafka_source(settings):
             {
                 "security.protocol": "SASL_SSL",
                 "sasl.mechanism": "OAUTHBEARER",
-                "sasl.jaas.config": (
-                    "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;"
-                ),
-                "sasl.login.callback.handler.class": (
-                    "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler"
-                ),
+                "sasl.login.callback.handler.class": "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler",
+                "sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;",
                 # полезно для дебага (потом убрать):
                 "log4j.logger.org.apache.kafka": "DEBUG",
             }

@@ -1,3 +1,10 @@
+FROM maven:3.9-eclipse-temurin-17 AS kafka_auth_deps
+WORKDIR /build
+COPY processing/jars/pom.xml ./pom.xml
+RUN mvn -q -DskipTests dependency:copy-dependencies \
+    -DincludeScope=runtime \
+    -DoutputDirectory=/deps
+
 FROM flink:2.0.1-scala_2.12-java17
 
 USER root
@@ -76,13 +83,16 @@ COPY processing/jars/hadoop-client-api-3.3.6.jar /opt/flink/lib/
 COPY processing/jars/hadoop-client-runtime-3.3.6.jar /opt/flink/lib/
 COPY processing/jars/managed-kafka-auth-login-handler-1.0.6.jar /opt/flink/lib/
 
+COPY --from=kafka_auth_deps /deps/*.jar /opt/flink/lib/
+
+
 # 2) Put the GCS filesystem plugin into /opt/flink/plugins/gs-fs-hadoop
 #    This is crucial so Flink can resolve the "gs://" scheme.
 RUN mkdir -p /opt/flink/plugins/gs-fs-hadoop
 COPY processing/jars/flink-gs-fs-hadoop-2.0.1.jar /opt/flink/plugins/gs-fs-hadoop/
 
 # (опционально) sanity check: показать, что jar реально на месте
-RUN ls -la /opt/flink/lib && ls -la /opt/flink/plugins/gs-fs-hadoop
+RUN ls -la /opt/flink/lib | sed -n '1,200p'
 
 WORKDIR /opt/flink/usrlib
 
