@@ -27,7 +27,7 @@ flink:
   taskManager:
     replicas: 1
     cpu: 0.25
-    memory: "2048mb"
+    memory: "1536m"
     slots: 1
 
   configuration:
