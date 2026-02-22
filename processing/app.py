@@ -122,7 +122,7 @@ def main():
         ),
     ).filter(lambda r: r is not None)
     descriptor_options = {
-        "sink.rolling-policy.file-size": "128MB",
+        "sink.rolling-policy.file-size": "16MB",
         "sink.rolling-policy.rollover-interval": "5 min",
         "sink.partition-commit.trigger": "process-time",
         "sink.partition-commit.delay": "1 min",
