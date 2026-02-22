@@ -29,3 +29,7 @@ output "pubsub_topic" {
 output "pubsub_subscription" {
   value = google_pubsub_subscription.datalake_objects_sub.name
 }
+
+output "flink_public_ip" {
+  value = google_compute_address.flink_ip.address
+}
