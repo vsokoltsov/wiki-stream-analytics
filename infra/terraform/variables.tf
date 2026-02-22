@@ -63,3 +63,33 @@ variable "name_prefix" {
   description = "Prefix for resource names"
   default     = "wikistream"
 }
+
+# app namespace
+variable "app_namespace" {
+  type    = string
+  default = "wikistream"
+}
+
+# Operator versions (Operator 1.14.0 is current as of Feb 2026)  [oai_citation:3‡flink.apache.org](https://flink.apache.org/2026/02/15/apache-flink-kubernetes-operator-1.14.0-release-announcement/?utm_source=chatgpt.com)
+variable "flink_operator_version" {
+  type    = string
+  default = "1.14.0"
+}
+
+# cert-manager chart
+variable "cert_manager_version" {
+  type    = string
+  default = "v1.18.2"
+}
+
+# UI exposure
+variable "enable_ingress" {
+  type    = bool
+  default = false
+}
+
+variable "ingress_host" {
+  type        = string
+  description = "DNS host for Flink UI ingress"
+  default     = "flink-ui.example.com"
+}

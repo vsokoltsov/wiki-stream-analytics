@@ -73,3 +73,22 @@ resource "google_secret_manager_secret_version" "kafka_sasl_username_v1" {
     google_project_service.secretmanager
   ]
 }
+
+resource "google_secret_manager_secret" "gcs_bucket" {
+  secret_id = "gcs_bucket"
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.secretmanager]
+}
+
+resource "google_secret_manager_secret_version" "gcs_bucket_v1" {
+  secret      = google_secret_manager_secret.gcs_bucket.id
+  secret_data = google_storage_bucket.datalake.name
+
+  depends_on = [
+    google_service_account.processing_sa,
+    google_project_service.secretmanager
+  ]
+}

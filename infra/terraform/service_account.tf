@@ -13,6 +13,23 @@ resource "google_service_account" "producer_sa" {
   display_name = "Wiki Producer SA"
 }
 
+resource "google_service_account" "processing_sa" {
+  account_id   = "wiki-processing"
+  display_name = "Wiki Processing SA"
+}
+
+resource "kubernetes_service_account_v1" "processing" {
+  depends_on = [kubernetes_namespace_v1.wikistream]
+
+  metadata {
+    name      = "processing-sa"
+    namespace = kubernetes_namespace_v1.wikistream.metadata[0].name
+    annotations = {
+      "iam.gke.io/gcp-service-account" = google_service_account.processing_sa.email
+    }
+  }
+}
+
 resource "kubernetes_service_account_v1" "producer" {
   depends_on = [kubernetes_namespace_v1.wikistream]
 

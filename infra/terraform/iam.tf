@@ -135,6 +135,12 @@ resource "google_service_account_iam_member" "producer_wi" {
   member = "serviceAccount:${var.project_id}.svc.id.goog[wikistream/producer-sa]"
 }
 
+resource "google_service_account_iam_member" "processing_wi" {
+  service_account_id = google_service_account.processing_sa.name
+  role               = "roles/iam.workloadIdentityUser"
+  member = "serviceAccount:${var.project_id}.svc.id.goog[wikistream/processing-sa]"
+}
+
 resource "google_project_iam_member" "gke_nodes_log_writer" {
   project = var.project_id
   role    = "roles/logging.logWriter"
@@ -157,6 +163,12 @@ resource "google_project_iam_member" "producer_secret_accessor" {
   project = var.project_id
   role    = "roles/secretmanager.secretAccessor"
   member  = "serviceAccount:${google_service_account.producer_sa.email}"
+}
+
+resource "google_project_iam_member" "processing_secret_accessor" {
+  project = var.project_id
+  role    = "roles/secretmanager.secretAccessor"
+  member  = "serviceAccount:${google_service_account.processing_sa.email}"
 }
 
 data "google_storage_project_service_account" "gcs" {

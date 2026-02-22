@@ -30,8 +30,6 @@ resource "google_container_node_pool" "primary" {
   cluster  = google_container_cluster.gke.name
   location = var.region
 
-  node_count = 1
-
   node_config {
     machine_type = "e2-medium"
 
@@ -44,15 +42,24 @@ resource "google_container_node_pool" "primary" {
   }
 
   autoscaling {
-    min_node_count = 3
-    max_node_count = 10
+    min_node_count = 2
+    max_node_count = 4
   }
 
   management {
     auto_repair  = true
     auto_upgrade = true
   }
-  
+  timeouts {
+    update = "90m"
+    create = "60m"
+    delete = "60m"
+  }
+
+  upgrade_settings {
+    max_surge       = 0
+    max_unavailable = 1
+  }
 }
 
 # Give "cluster-admin" to whoever authenticates as gha-ci via gcloud/kubectl
