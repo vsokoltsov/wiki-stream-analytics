@@ -190,3 +190,9 @@ resource "google_pubsub_topic_iam_member" "allow_gcs_publish" {
 
   depends_on = [google_project_service.pubsub]
 }
+
+resource "google_storage_bucket_iam_member" "processing_gcs_object_admin" {
+  bucket = google_storage_bucket.datalake.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.processing_sa.email}"
+}
