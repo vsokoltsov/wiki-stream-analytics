@@ -132,64 +132,64 @@ jobs:
             --substitutions=_TAG=$GITHUB_SHA,_IMAGE=$IMAGE \
             .
 
-  # deploy:
-  #   name: Deploy
-  #   environment: prod
-  #   needs: [build]
-  #   runs-on: ubuntu-latest
+  deploy:
+    name: Deploy
+    environment: prod
+    needs: [build]
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - id: auth
-  #       uses: google-github-actions/auth@v3
-  #       with:
-  #         project_id: ${{ secrets.GCP_PROJECT_ID }}
-  #         workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-  #         service_account: ${{ secrets.CI_SA_EMAIL }}
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.CI_SA_EMAIL }}
 
-  #     - uses: google-github-actions/setup-gcloud@v2
-  #       with:
-  #         install_components: "gke-gcloud-auth-plugin"
+      - uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: "gke-gcloud-auth-plugin"
 
-  #     - name: Get GKE credentials
-  #       env:
-  #         PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  #         REGION: ${{ secrets.REGION }}
-  #         GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
-  #         USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
-  #       run: |
-  #         set -eux
-  #         gcloud container clusters get-credentials "$GKE_CLUSTER" \
-  #           --region "$REGION" \
-  #           --project "$PROJECT_ID"
+      - name: Get GKE credentials
+        env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          REGION: ${{ secrets.REGION }}
+          GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
+          USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
+        run: |
+          set -eux
+          gcloud container clusters get-credentials "$GKE_CLUSTER" \
+            --region "$REGION" \
+            --project "$PROJECT_ID"
 
-  #     - name: Setup Helm
-  #       uses: azure/setup-helm@v4
-  #       with:
-  #         version: v3.14.4
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
 
-  #     - name: Deploy processing with Helm
-  #       env:
-  #         PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  #         NAMESPACE: ${{ secrets.HELM_NAMESPACE }}
-  #         IMAGE_REPO: europe-west3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/wiki-stream-analytics/wiki-processing
-  #         IMAGE_TAG: ${{ github.sha }}
-  #         HELM_KUBERNETES_QPS: "50"
-  #         HELM_KUBERNETES_BURST: "100"
-  #       run: |
-  #         set -eux
+      - name: Deploy processing with Helm
+        env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          NAMESPACE: ${{ secrets.HELM_NAMESPACE }}
+          IMAGE_REPO: europe-west3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/wiki-stream-analytics/wiki-processing
+          IMAGE_TAG: ${{ github.sha }}
+          HELM_KUBERNETES_QPS: "50"
+          HELM_KUBERNETES_BURST: "100"
+        run: |
+          set -eux
 
-  #         helm dependency update infra/k8s/charts/wiki-processing
-  #         helm dependency build infra/k8s/charts/wiki-processing
+          helm dependency update infra/k8s/charts/wiki-processing
+          helm dependency build infra/k8s/charts/wiki-processing
 
-  #         helm upgrade --install wiki-processing infra/k8s/charts/wiki-processing \
-  #           --set serviceAccount.create=false \
-  #           --set serviceAccount.name=processing-sa \
-  #           --namespace "$NAMESPACE" \
-  #           --set image.repository="$IMAGE_REPO" \
-  #           --set image.tag="$IMAGE_TAG" \
-  #           --set gcp.projectId="${PROJECT_ID}" \
-  #           --timeout 15m --debug
+          helm upgrade --install wiki-processing infra/k8s/charts/wiki-processing \
+            --set serviceAccount.create=false \
+            --set serviceAccount.name=processing-sa \
+            --namespace "$NAMESPACE" \
+            --set image.repository="$IMAGE_REPO" \
+            --set image.tag="$IMAGE_TAG" \
+            --set gcp.projectId="${PROJECT_ID}" \
+            --timeout 15m --debug
 
-  #         kubectl -n "$NAMESPACE" rollout status deploy/wiki-processing-wiki-processing --timeout=300s
+          kubectl -n "$NAMESPACE" rollout status deploy/wiki-processing-wiki-processing --timeout=300s
