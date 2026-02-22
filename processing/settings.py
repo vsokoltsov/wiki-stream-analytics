@@ -7,7 +7,7 @@ class ProcessingSettings(BaseSettings):
     KAFKA_BOOTSTRAP_SERVERS: str = "kafka:9092"
     KAFKA_TOPIC: str = "recentchange_raw"
     KAFKA_MODE: str
-    KAFKA_SASL_USERNAME_PROCESSING: Optional[str] = None
+    KAFKA_SASL_USERNAME: Optional[str] = None
     GCS_BUCKET: str
     KAFKA_GROUP_ID: str
 

@@ -59,7 +59,7 @@ def build_kafka_source(settings):
         # как в producer: SASL_SSL + SASL/PLAIN (username=email, password=access_token)
         token = GcpAccessToken().get()
         principal_email = (
-            settings.KAFKA_SASL_USERNAME_PROCESSING
+            settings.KAFKA_SASL_USERNAME
         )  # email сервис-аккаунта
 
         kafka_props.update(
