@@ -5,7 +5,7 @@ from typing import Optional
 from producer.settings import get_producer_settings
 from producer.service import WikipediaProducerService
 from producer.wiki_client import WikiClient
-from common.kafka import build_producer
+from producer.kafka import build_producer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("wiki-producer")

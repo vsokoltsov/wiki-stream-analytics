@@ -40,7 +40,9 @@ class GcpManagedKafkaOauthBearerProvider(AbstractTokenProvider):
         # refresh() блокирующий -> в thread
         await asyncio.to_thread(self._ensure_fresh)
 
-        if not getattr(self._creds, "token", None) or not getattr(self._creds, "expiry", None):
+        if not getattr(self._creds, "token", None) or not getattr(
+            self._creds, "expiry", None
+        ):
             raise RuntimeError("ADC credentials did not provide token/expiry")
 
         now = dt.datetime.now(dt.timezone.utc).timestamp()
@@ -75,9 +77,10 @@ class GcpManagedKafkaOauthBearerProvider(AbstractTokenProvider):
         return {"principal": self._principal_email}
 
 
-
 def build_producer(settings: ProducerSettings) -> AIOKafkaProducer:
-    mode = (getattr(settings, "KAFKA_MODE", None) or os.getenv("KAFKA_MODE", "PLAINTEXT")).upper()
+    mode = (
+        getattr(settings, "KAFKA_MODE", None) or os.getenv("KAFKA_MODE", "PLAINTEXT")
+    ).upper()
 
     if mode == "PLAINTEXT":
         return AIOKafkaProducer(
@@ -86,10 +89,16 @@ def build_producer(settings: ProducerSettings) -> AIOKafkaProducer:
 
     if mode == "GCP_OAUTH":
         ssl_ctx = ssl.create_default_context()
-        principal_email = settings.KAFKA_SASL_USERNAME  # email сервис-аккаунта (principal)
+        principal_email = (
+            settings.KAFKA_SASL_USERNAME
+        )  # email сервис-аккаунта (principal)
         if not principal_email:
-            raise ValueError(f'KAFKA_SASL_USERNAME variable is empty: {settings.KAFKA_SASL_USERNAME}')
-        token_provider = GcpManagedKafkaOauthBearerProvider(principal_email=principal_email)
+            raise ValueError(
+                f"KAFKA_SASL_USERNAME variable is empty: {settings.KAFKA_SASL_USERNAME}"
+            )
+        token_provider = GcpManagedKafkaOauthBearerProvider(
+            principal_email=principal_email
+        )
 
         return AIOKafkaProducer(
             bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
