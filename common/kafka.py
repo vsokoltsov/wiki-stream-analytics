@@ -1,7 +1,9 @@
-import os
-import ssl
 import asyncio
-from typing import Optional, Dict, Any
+import base64
+import datetime as dt
+import json
+import ssl
+from typing import Any, Dict, Optional
 
 import google.auth
 from google.auth.transport.requests import Request as GoogleAuthRequest
@@ -12,37 +14,65 @@ from aiokafka.abc import AbstractTokenProvider
 from producer.settings import ProducerSettings
 
 
-class GcpOauthBearerTokenProvider(AbstractTokenProvider):
+def _b64url(s: str) -> str:
+    # urlsafe base64 без '=' в конце — как в примере Google
+    return base64.urlsafe_b64encode(s.encode("utf-8")).decode("utf-8").rstrip("=")
+
+
+class GcpManagedKafkaOauthBearerProvider(AbstractTokenProvider):
     """
-    aiokafka will call `token()` during SASL/OAUTHBEARER handshake.
-    We must return a *fresh* access token string.
+    Делает токен в формате, который ожидает Google Managed Service for Apache Kafka:
+    token = base64url(header) + "." + base64url(payload) + "." + base64url(access_token)
     """
+
+    HEADER = json.dumps({"typ": "JWT", "alg": "GOOG_OAUTH2_TOKEN"})
 
     def __init__(self, principal_email: str, scopes: Optional[list[str]] = None):
         self._principal_email = principal_email
         self._scopes = scopes or ["https://www.googleapis.com/auth/cloud-platform"]
 
-        # ADC credentials (refreshable in most environments: service account, workload identity, etc.)
         creds, _ = google.auth.default(scopes=self._scopes)
         self._creds = creds
-
         self._req = GoogleAuthRequest()
 
     async def token(self) -> str:
-        # google-auth refresh is blocking -> do it in a thread
+        # refresh() блокирующий -> в thread
         await asyncio.to_thread(self._ensure_fresh)
-        if not self._creds.token:
-            raise RuntimeError("Failed to obtain GCP access token via ADC")
-        return self._creds.token
+
+        if not getattr(self._creds, "token", None) or not getattr(self._creds, "expiry", None):
+            raise RuntimeError("ADC credentials did not provide token/expiry")
+
+        now = dt.datetime.now(dt.timezone.utc).timestamp()
+        exp = self._creds.expiry.replace(tzinfo=dt.timezone.utc).timestamp()
+
+        payload = json.dumps(
+            {
+                "exp": exp,
+                "iat": now,
+                "iss": "Google",
+                # Важно: sub должен быть principal (email SA), который имеет roles/managedkafka.client
+                "sub": self._principal_email,
+            }
+        )
+
+        wrapped = ".".join(
+            [
+                _b64url(self.HEADER),
+                _b64url(payload),
+                _b64url(self._creds.token),
+            ]
+        )
+        return wrapped
 
     def _ensure_fresh(self) -> None:
-        # `valid`/`expired` semantics are handled by google-auth
         if not self._creds.valid or self._creds.expired:
             self._creds.refresh(self._req)
 
+    # extensions() можно оставить пустым — GCP пример работает без sasl.oauthbearer.extensions
+    # но если тебе нужно строго как во Flink, можно вернуть principal:
     def extensions(self) -> Dict[str, Any]:
-        # Same as: sasl.oauthbearer.extensions=principal=...
         return {"principal": self._principal_email}
+
 
 
 def build_producer(settings: ProducerSettings) -> AIOKafkaProducer:
@@ -58,7 +88,7 @@ def build_producer(settings: ProducerSettings) -> AIOKafkaProducer:
         principal_email = settings.KAFKA_SASL_USERNAME  # email сервис-аккаунта (principal)
         if not principal_email:
             raise ValueError(f'KAFKA_SASL_USERNAME variable is empty: {settings.KAFKA_SASL_USERNAME}')
-        token_provider = GcpOauthBearerTokenProvider(principal_email=principal_email)
+        token_provider = GcpManagedKafkaOauthBearerProvider(principal_email=principal_email)
 
         return AIOKafkaProducer(
             bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
