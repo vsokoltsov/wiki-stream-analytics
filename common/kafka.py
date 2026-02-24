@@ -3,6 +3,7 @@ import base64
 import datetime as dt
 import json
 import ssl
+import os
 from typing import Any, Dict, Optional
 
 import google.auth
