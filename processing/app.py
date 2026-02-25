@@ -122,7 +122,6 @@ def main():
         "sink.partition-commit.trigger": "process-time",
         "sink.partition-commit.delay": "0 s",
         "sink.partition-commit.policy.kind": "success-file",
-        "format.parquet.compression": "snappy",
         "sink.file-name.suffix": ".parquet",
     }
 
