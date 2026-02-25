@@ -37,7 +37,7 @@ class DatalakeStreamingPipeline:
             TableDescriptor.for_connector("filesystem")
             .schema(
                 Schema.new_builder()
-                .column("event_ts", DataTypes.TIMESTAMP_LTZ(3))
+                .column("event_ts", DataTypes.TIMESTAMP_LTZ(3).not_null())
                 .column("wiki", DataTypes.STRING())
                 .column("type", DataTypes.STRING())
                 .column("user_name", DataTypes.STRING())
@@ -61,11 +61,12 @@ class DatalakeStreamingPipeline:
         self.t_env.create_table("gcs_sink", sink_descriptor)
 
         event_ts_expr = call_sql(
-            "TO_TIMESTAMP_LTZ(CAST(event_ts_seconds * 1000 AS BIGINT), 3)"
+            "TO_TIMESTAMP_LTZ(CAST(event_ts_seconds AS BIGINT) * 1000, 3)"
         )
 
         return (
             self.t_env.from_path("curated_view")
+            .where(event_ts_expr.is_not_null)
             .select(
                 event_ts_expr.alias("event_ts"),
                 col("wiki"),
