@@ -63,7 +63,6 @@ def build_kafka_source(settings):
                 "sasl.mechanism": "OAUTHBEARER",
                 "sasl.login.callback.handler.class": "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler",
                 "sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;",
-                # ВАЖНО: username должен совпадать с principal (SA), иначе будет 400/403 как раньше
                 "sasl.oauthbearer.extensions": f"principal={principal_email}",
                 "log4j.logger.org.apache.kafka": "DEBUG",
             }
@@ -123,6 +122,8 @@ def main():
         "sink.partition-commit.trigger": "process-time",
         "sink.partition-commit.delay": "0 s",
         "sink.partition-commit.policy.kind": "success-file",
+        "format.parquet.compression": "snappy",
+        "sink.file-name.suffix": ".parquet",
     }
 
     pipeline = DatalakeStreamingPipeline(
