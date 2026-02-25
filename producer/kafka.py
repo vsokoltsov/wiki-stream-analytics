@@ -96,6 +96,7 @@ def build_producer(settings: ProducerSettings) -> AIOKafkaProducer:
             raise ValueError(
                 f"KAFKA_SASL_USERNAME variable is empty: {settings.KAFKA_SASL_USERNAME}"
             )
+        print(f"principal_email: {principal_email}")
         token_provider = GcpManagedKafkaOauthBearerProvider(
             principal_email=principal_email
         )
@@ -106,7 +107,6 @@ def build_producer(settings: ProducerSettings) -> AIOKafkaProducer:
             ssl_context=ssl_ctx,
             sasl_mechanism="OAUTHBEARER",
             sasl_oauth_token_provider=token_provider,
-            # ВАЖНО: НЕ указывать sasl_plain_username/password при OAUTHBEARER
         )
 
     raise ValueError(f"Unknown KAFKA_MODE={mode}. Use PLAINTEXT or GCP_OAUTH.")
