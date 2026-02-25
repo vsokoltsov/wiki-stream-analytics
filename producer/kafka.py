@@ -96,7 +96,6 @@ def build_producer(settings: ProducerSettings) -> AIOKafkaProducer:
             raise ValueError(
                 f"KAFKA_SASL_USERNAME variable is empty: {settings.KAFKA_SASL_USERNAME}"
             )
-        print(f"principal_email: {principal_email}")
         token_provider = GcpManagedKafkaOauthBearerProvider(
             principal_email=principal_email
         )
