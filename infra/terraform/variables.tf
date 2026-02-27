@@ -93,3 +93,34 @@ variable "ingress_host" {
   description = "DNS host for Flink UI ingress"
   default     = "flink-ui.example.com"
 }
+
+variable "cluster_name" {
+  type    = string
+  default = "wikistream-dataflow"
+}
+
+variable "image_version" {
+  type    = string
+  default = "2.2-debian12"
+}
+
+variable "master_machine_type" {
+  type    = string
+  default = "e2-standard-2"
+}
+
+variable "worker_machine_type" {
+  type    = string
+  default = "e2-standard-2"
+}
+
+variable "worker_count" {
+  type    = number
+  default = 2
+}
+
+# Bucket с твоими parquet (или чем там вход)
+variable "datalake_bucket" {
+  type    = string
+  default = "wikistream-datalake"
+}

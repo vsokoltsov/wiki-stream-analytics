@@ -9,6 +9,13 @@ resource "google_container_cluster" "gke" {
   network    = google_compute_network.vpc.name
   subnetwork = google_compute_subnetwork.subnet.name
 
+  private_cluster_config {
+    enable_private_nodes    = true
+    enable_private_endpoint = false
+
+    master_ipv4_cidr_block = "172.16.0.0/28"
+  }
+
   workload_identity_config {
     workload_pool = "${var.project_id}.svc.id.goog"
   }

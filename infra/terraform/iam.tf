@@ -196,3 +196,45 @@ resource "google_storage_bucket_iam_member" "processing_gcs_object_admin" {
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.processing_sa.email}"
 }
+resource "google_project_iam_member" "dataflow_worker" {
+  project = var.project_id
+  role    = "roles/dataflow.worker"
+  member  = "serviceAccount:${google_service_account.dataflow_sa.email}"
+}
+
+resource "google_project_iam_member" "bq_jobuser" {
+  project = var.project_id
+  role    = "roles/bigquery.jobUser"
+  member  = "serviceAccount:${google_service_account.dataflow_sa.email}"
+}
+
+resource "google_bigquery_dataset_iam_member" "bq_data_editor" {
+  dataset_id = "wikistream_raw"
+  role       = "roles/bigquery.dataEditor"
+  member     = "serviceAccount:${google_service_account.dataflow_sa.email}"
+}
+
+resource "google_storage_bucket_iam_member" "datalake_read" {
+  bucket = "wikistream-datalake"
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_service_account.dataflow_sa.email}"
+}
+
+# staging/temp/templates rw
+resource "google_storage_bucket_iam_member" "staging_rw" {
+  bucket = google_storage_bucket.dataflow_staging.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.dataflow_sa.email}"
+}
+
+resource "google_storage_bucket_iam_member" "temp_rw" {
+  bucket = google_storage_bucket.dataflow_temp.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.dataflow_sa.email}"
+}
+
+resource "google_storage_bucket_iam_member" "templates_rw" {
+  bucket = google_storage_bucket.dataflow_templates.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.dataflow_sa.email}"
+}

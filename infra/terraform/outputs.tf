@@ -74,3 +74,49 @@ output "bq_destination_table_for_jobs" {
     location   = google_bigquery_dataset.raw.location
   }
 }
+
+output "dataflow_staging_bucket_name" {
+  description = "GCS bucket name for Dataflow staging files"
+  value       = google_storage_bucket.dataflow_staging.name
+}
+
+output "dataflow_temp_bucket_name" {
+  description = "GCS bucket name for Dataflow temp files"
+  value       = google_storage_bucket.dataflow_temp.name
+}
+
+output "dataflow_templates_bucket_name" {
+  description = "GCS bucket name for Dataflow flex templates"
+  value       = google_storage_bucket.dataflow_templates.name
+}
+
+output "dataflow_staging_uri" {
+  description = "gs:// URI to Dataflow staging bucket"
+  value       = "gs://${google_storage_bucket.dataflow_staging.name}"
+}
+
+output "dataflow_temp_uri" {
+  description = "gs:// URI to Dataflow temp bucket"
+  value       = "gs://${google_storage_bucket.dataflow_temp.name}"
+}
+
+output "dataflow_templates_uri" {
+  description = "gs:// URI to Dataflow templates bucket"
+  value       = "gs://${google_storage_bucket.dataflow_templates.name}"
+}
+
+# Часто удобно сразу отдавать дефолтные папки
+output "dataflow_staging_location" {
+  description = "Default staging location path"
+  value       = "gs://${google_storage_bucket.dataflow_staging.name}/staging"
+}
+
+output "dataflow_temp_location" {
+  description = "Default temp location path"
+  value       = "gs://${google_storage_bucket.dataflow_temp.name}/tmp"
+}
+
+output "dataflow_template_dir" {
+  description = "Default folder for flex template specs"
+  value       = "gs://${google_storage_bucket.dataflow_templates.name}/templates"
+}

@@ -57,3 +57,8 @@ resource "google_project_service" "cloudresourcemanager" {
   project = var.project_id
   service = "cloudresourcemanager.googleapis.com"
 }
+
+resource "google_project_service" "dataflow" {
+  project            = var.project_id
+  service            = "dataflow.googleapis.com"
+}
