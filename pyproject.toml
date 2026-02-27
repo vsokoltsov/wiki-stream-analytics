@@ -22,7 +22,10 @@ dev = [
     "watchfiles>=1.1.1",
 ]
 ingestion = [
-    "apache-beam[gcp]>=2.60.0,<=2.61.0",
+    "apache-beam[gcp]==2.61.0",
+    "google-cloud-bigquery>=3.0.0",
+    "google-api-core>=2.0.0",
+    "gcsfs>=2025.12.0",
 ]
 processing = [
     "apache-flink==2.0.1",
@@ -44,3 +47,12 @@ markers = [
     "unit: Unit tests (fast, no external services).",
     "integration: Integration tests (Kafka, Docker, etc.).",
 ]
+
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ingestion*"]
