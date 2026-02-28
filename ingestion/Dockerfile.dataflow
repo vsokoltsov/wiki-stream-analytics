@@ -1,0 +1,33 @@
+# syntax=docker/dockerfile:1.6
+ARG BEAM_VERSION=2.61.0
+FROM apache/beam_python3.12_sdk:${BEAM_VERSION}
+
+WORKDIR /app
+
+ENV PYTHONPATH="/app"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      curl ca-certificates gcc g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=gcr.io/dataflow-templates-base/python310-template-launcher-base \
+  /opt/google/dataflow/python_template_launcher \
+  /opt/google/dataflow/python_template_launcher
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:${PATH}"
+
+
+COPY pyproject.toml uv.lock /app/
+RUN uv sync --frozen --group ingestion --python /usr/local/bin/python
+
+COPY ingestion/ /app/ingestion
+COPY README.md /app/README.md
+RUN uv pip install -e . --python /usr/local/bin/python
+
+RUN python -c "import importlib.metadata as m; print('dist=', m.version('wiki-stream-analytics'))"
+RUN python -c "import ingestion; print('ingestion=', ingestion.__file__)"
+
+ENV FLEX_TEMPLATE_PYTHON_PY_FILE=ingestion/dataflow.py
+
+ENTRYPOINT ["/opt/apache/beam/boot"]
