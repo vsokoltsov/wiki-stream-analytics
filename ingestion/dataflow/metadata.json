@@ -1,0 +1,48 @@
+{
+  "name": "wikistream-ingestion",
+  "description": "Wikistream ingestion pipeline",
+  "parameters": [
+    {
+      "name": "project",
+      "label": "GCP project",
+      "helpText": "GCP project id, e.g. wiki-stream-analytics",
+      "paramType": "TEXT",
+      "isOptional": false
+    },
+    {
+      "name": "subscription",
+      "label": "PubSub subscription",
+      "helpText": "Full subscription path: projects/<project>/subscriptions/<name>",
+      "paramType": "TEXT",
+      "isOptional": false
+    },
+    {
+      "name": "table_id",
+      "label": "BigQuery table",
+      "helpText": "BigQuery table id: project:dataset.table or project.dataset.table",
+      "paramType": "TEXT",
+      "isOptional": false
+    },
+    {
+      "name": "sdk_container_image",
+      "label": "SDK container image",
+      "helpText": "Container image for Dataflow workers (e.g. Flex Template image)",
+      "paramType": "TEXT",
+      "isOptional": true
+    },
+    {
+      "name": "temp_location",
+      "label": "Temp location",
+      "helpText": "GCS temp location, e.g. gs://<bucket>/tmp",
+      "paramType": "TEXT",
+      "isOptional": false
+    },
+    {
+      "name": "staging_location",
+      "label": "Staging location",
+      "helpText": "GCS staging location, e.g. gs://<bucket>/staging",
+      "paramType": "TEXT",
+      "isOptional": false
+    }
+  ]
+}
