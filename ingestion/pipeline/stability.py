@@ -1,7 +1,12 @@
 import time
 import json
 import apache_beam as beam
-from apache_beam.transforms.userstate import ReadModifyWriteStateSpec, TimerSpec, on_timer, TimeDomain
+from apache_beam.transforms.userstate import (
+    ReadModifyWriteStateSpec,
+    TimerSpec,
+    on_timer,
+    TimeDomain,
+)
 from apache_beam.coders import VarIntCoder, StrUtf8Coder
 from google.cloud import storage
 
@@ -24,7 +29,9 @@ class WaitForFileStabilityDoFn(beam.DoFn):
     # names to ignore inside a partition folder
     _EXCLUDE_SUFFIXES = ("_SUCCESS", "_metadata", "_common_metadata")
 
-    def __init__(self, project_id: str, poll_every_sec: int = 30, stable_needed: int = 2):
+    def __init__(
+        self, project_id: str, poll_every_sec: int = 30, stable_needed: int = 2
+    ):
         self.project_id = project_id
         self.poll_every_sec = poll_every_sec
         self.stable_needed = stable_needed

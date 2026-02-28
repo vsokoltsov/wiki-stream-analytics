@@ -1,6 +1,6 @@
-import apache_beam as beam
 from typing import Dict, Any
 from apache_beam.io.gcp.pubsub import PubsubMessage
+
 
 def parse_notification(m: PubsubMessage) -> Dict[str, Any]:
     attrs = m.attributes or {}
@@ -19,6 +19,7 @@ def parse_notification(m: PubsubMessage) -> Dict[str, Any]:
         "prefix": prefix,
         "attributes": dict(attrs),
     }
+
 
 def is_final_object(e: dict) -> bool:
     obj = e["object"]

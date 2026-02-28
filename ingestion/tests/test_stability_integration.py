@@ -9,6 +9,7 @@ from ingestion.pipeline.stability import WaitForFileStabilityDoFn
 from ingestion.pipeline.parse import parse_notification, is_final_object
 from ingestion.pipeline.map_fns import to_completeness_kv
 
+
 @pytest.mark.integration
 class TestStabilityIntegration:
     """Integration tests: pipeline with WaitForFileStabilityDoFn and mocked GCS."""
@@ -16,13 +17,17 @@ class TestStabilityIntegration:
     def test_pipeline_non_success_events_do_not_emit(self):
         """Data-file events (not _SUCCESS) never yield from WaitForFileStabilityDoFn."""
         messages = [
-            PubsubMessage(b"", {"bucketId": "b", "objectId": "stream/dt=2026-02-24/hour=1/part-0"}),
+            PubsubMessage(
+                b"", {"bucketId": "b", "objectId": "stream/dt=2026-02-24/hour=1/part-0"}
+            ),
         ]
         mock_client = MagicMock()
         mock_client.bucket.return_value = MagicMock()
         mock_client.list_blobs.return_value = []
 
-        with patch("ingestion.pipeline.stability.storage.Client", return_value=mock_client):
+        with patch(
+            "ingestion.pipeline.stability.storage.Client", return_value=mock_client
+        ):
             with beam.Pipeline() as p:
                 out = (
                     p
@@ -32,7 +37,9 @@ class TestStabilityIntegration:
                     | "KeyForCompleteness" >> beam.Map(to_completeness_kv)
                     | "WaitForStable"
                     >> beam.ParDo(
-                        WaitForFileStabilityDoFn(project_id="test", poll_every_sec=30, stable_needed=2)
+                        WaitForFileStabilityDoFn(
+                            project_id="test", poll_every_sec=30, stable_needed=2
+                        )
                     )
                 )
                 assert_that(out, equal_to([]))
@@ -42,7 +49,10 @@ class TestStabilityIntegration:
         messages = [
             PubsubMessage(
                 b"",
-                {"bucketId": "test-bucket", "objectId": "stream/dt=2026-02-24/hour=1/_SUCCESS"},
+                {
+                    "bucketId": "test-bucket",
+                    "objectId": "stream/dt=2026-02-24/hour=1/_SUCCESS",
+                },
             ),
         ]
         mock_blob = lambda name, size: MagicMock(name=name, size=size)
@@ -53,7 +63,9 @@ class TestStabilityIntegration:
             mock_blob("stream/dt=2026-02-24/hour=1/part-1", 50),
         ]
 
-        with patch("ingestion.pipeline.stability.storage.Client", return_value=mock_client):
+        with patch(
+            "ingestion.pipeline.stability.storage.Client", return_value=mock_client
+        ):
             with beam.Pipeline() as p:
                 _ = (
                     p

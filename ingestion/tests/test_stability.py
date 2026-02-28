@@ -1,13 +1,9 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-import apache_beam as beam
-from apache_beam.io.gcp.pubsub import PubsubMessage
-from apache_beam.testing.util import assert_that, equal_to
 
 from ingestion.pipeline.stability import WaitForFileStabilityDoFn
-from ingestion.pipeline.parse import parse_notification, is_final_object
-from ingestion.pipeline.map_fns import to_completeness_kv
+
 
 @pytest.mark.unit
 class TestStabilityUnit:
@@ -34,6 +30,7 @@ class TestStabilityUnit:
 
     def test_folder_stats_returns_count_and_size_with_mock_client(self):
         """_folder_stats counts only data blobs and sums size; excludes _SUCCESS and dirs."""
+
         def mock_blob(blob_name, blob_size):
             m = MagicMock()
             m.name = blob_name
@@ -51,21 +48,29 @@ class TestStabilityUnit:
         mock_client.bucket.return_value = mock_bucket
         mock_client.list_blobs.return_value = mock_blobs
 
-        dofn = WaitForFileStabilityDoFn(project_id="test-project", poll_every_sec=30, stable_needed=2)
+        dofn = WaitForFileStabilityDoFn(
+            project_id="test-project", poll_every_sec=30, stable_needed=2
+        )
         dofn._storage_client = mock_client
 
-        count, total_size = dofn._folder_stats("my-bucket", "stream/dt=2026-02-24/hour=1/")
+        count, total_size = dofn._folder_stats(
+            "my-bucket", "stream/dt=2026-02-24/hour=1/"
+        )
 
         assert count == 2
         assert total_size == 150
-        mock_client.list_blobs.assert_called_once_with(mock_bucket, prefix="stream/dt=2026-02-24/hour=1/")
+        mock_client.list_blobs.assert_called_once_with(
+            mock_bucket, prefix="stream/dt=2026-02-24/hour=1/"
+        )
 
     def test_folder_stats_empty_prefix_returns_zero_with_mock(self):
         mock_client = MagicMock()
         mock_client.bucket.return_value = MagicMock()
         mock_client.list_blobs.return_value = []
 
-        dofn = WaitForFileStabilityDoFn(project_id="test", poll_every_sec=30, stable_needed=2)
+        dofn = WaitForFileStabilityDoFn(
+            project_id="test", poll_every_sec=30, stable_needed=2
+        )
         dofn._storage_client = mock_client
 
         count, total_size = dofn._folder_stats("b", "empty/")

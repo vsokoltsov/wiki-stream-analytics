@@ -1,10 +1,10 @@
 import pytest
 import apache_beam as beam
 from apache_beam.io.gcp.pubsub import PubsubMessage
-from apache_beam.testing.util import assert_that, equal_to
 from unittest.mock import MagicMock, patch
 
 from ingestion.pipeline.definition import create_ingestion_pipeline
+
 
 @pytest.mark.integration
 class TestDefinitionIntegration:
@@ -29,7 +29,7 @@ class TestDefinitionIntegration:
         }
 
         class PassThroughStabilityDoFn(beam.DoFn):
-            def process(self, kv): # type: ignore[override]
+            def process(self, kv):  # type: ignore[override]
                 key, event = kv
                 event = dict(event)
                 event["folder_uri"] = f"gs://{event['bucket']}/{event['prefix']}*"
@@ -75,7 +75,7 @@ class TestDefinitionIntegration:
         }
 
         class PassThroughStabilityDoFn(beam.DoFn):
-            def process(self, kv): # type: ignore[override]
+            def process(self, kv):  # type: ignore[override]
                 key, event = kv
                 event = dict(event)
                 event["folder_uri"] = f"gs://{event['bucket']}/{event['prefix']}*"

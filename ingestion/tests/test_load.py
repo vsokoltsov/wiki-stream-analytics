@@ -1,11 +1,10 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-import apache_beam as beam
-from apache_beam.testing.util import assert_that, equal_to
 from google.api_core.exceptions import BadRequest
 
 from ingestion.pipeline.load import LoadFolderToBQDoFn
+
 
 @pytest.mark.unit
 class TestLoadUnit:

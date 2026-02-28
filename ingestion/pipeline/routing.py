@@ -1,8 +1,8 @@
-from typing import Dict, Any
 import re
 
 DT_RE = re.compile(r"dt=(\d{4}-\d{2}-\d{2})")
 HR_RE = re.compile(r"hour=(\d{1,2})")
+
 
 def add_partition_info(e, table_id: str):
     prefix = e["prefix"]

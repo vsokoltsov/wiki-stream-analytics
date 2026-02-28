@@ -6,6 +6,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class LoadFolderToBQDoFn(beam.DoFn):
     def __init__(self, project_id: str):
         self.project_id = project_id
@@ -14,10 +15,10 @@ class LoadFolderToBQDoFn(beam.DoFn):
     def setup(self):
         self._bq = bigquery.Client(project=self.project_id)
 
-    def process(self, e: Dict[str, Any]): # type: ignore[override]
+    def process(self, e: Dict[str, Any]):  # type: ignore[override]
         if not self._bq:
             raise ValueError("BigQuery client was not initialized!")
-        
+
         folder_uri = e.get("folder_uri")
         if not folder_uri or not folder_uri.endswith("*"):
             logger.warning(

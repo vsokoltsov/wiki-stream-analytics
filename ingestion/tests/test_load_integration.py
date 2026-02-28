@@ -7,6 +7,7 @@ from google.api_core.exceptions import BadRequest
 
 from ingestion.pipeline.load import LoadFolderToBQDoFn
 
+
 @pytest.mark.integration
 class TestLoadIntegration:
     """Integration/functional tests: LoadFolderToBQDoFn in a pipeline with mocked BigQuery."""
@@ -32,10 +33,15 @@ class TestLoadIntegration:
                             }
                         ]
                     )
-                    | "LoadToBQ" >> beam.ParDo(LoadFolderToBQDoFn(project_id="test-project"))
+                    | "LoadToBQ"
+                    >> beam.ParDo(LoadFolderToBQDoFn(project_id="test-project"))
                 )
-                result = out | "ExtractLoadedUri" >> beam.Map(lambda x: x.get("loaded_uri"))
-                assert_that(result, equal_to(["gs://test-bucket/stream/dt=2026-02-24/hour=1/*"]))
+                result = out | "ExtractLoadedUri" >> beam.Map(
+                    lambda x: x.get("loaded_uri")
+                )
+                assert_that(
+                    result, equal_to(["gs://test-bucket/stream/dt=2026-02-24/hour=1/*"])
+                )
 
     def test_pipeline_with_missing_folder_uri_emits_nothing(self):
         mock_client = MagicMock()
@@ -53,7 +59,8 @@ class TestLoadIntegration:
                             }
                         ]
                     )
-                    | "LoadToBQ" >> beam.ParDo(LoadFolderToBQDoFn(project_id="test-project"))
+                    | "LoadToBQ"
+                    >> beam.ParDo(LoadFolderToBQDoFn(project_id="test-project"))
                 )
                 count = out | "Count" >> beam.combiners.Count.Globally()
                 assert_that(count, equal_to([0]))
@@ -82,5 +89,13 @@ class TestLoadIntegration:
                 failed = out | "FailedOnly" >> beam.Filter(lambda x: "failed_uri" in x)
                 assert_that(
                     failed,
-                    equal_to([{"failed_uri": "gs://b/p*", "error": "400 Table not found", "table": "p.d.t"}]),
+                    equal_to(
+                        [
+                            {
+                                "failed_uri": "gs://b/p*",
+                                "error": "400 Table not found",
+                                "table": "p.d.t",
+                            }
+                        ]
+                    ),
                 )

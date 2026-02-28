@@ -1,9 +1,8 @@
 import pytest
-import apache_beam as beam
 from apache_beam.io.gcp.pubsub import PubsubMessage
-from apache_beam.testing.util import assert_that, equal_to
 
-from ingestion.pipeline.parse import parse_notification, is_final_object 
+from ingestion.pipeline.parse import parse_notification, is_final_object
+
 
 @pytest.mark.unit
 class TestParseUnit:
@@ -25,12 +24,16 @@ class TestParseUnit:
         assert out["generation"] == "12345"
         assert out["event_time"] == "2026-02-24T21:00:00Z"
         assert out["event_type"] == "OBJECT_FINALIZE"
-        assert out["file_path"] == "gs://wikistream-datalake/stream/dt=2026-02-24/hour=21/part-0001"
+        assert (
+            out["file_path"]
+            == "gs://wikistream-datalake/stream/dt=2026-02-24/hour=21/part-0001"
+        )
         assert out["prefix"] == "stream/dt=2026-02-24/hour=21/"
         assert out["attributes"] == attrs
 
-
-    def test_parse_notification_missing_optional_fields_generation_and_event_fields(self):
+    def test_parse_notification_missing_optional_fields_generation_and_event_fields(
+        self,
+    ):
         attrs = {
             "bucketId": "wikistream-datalake",
             "objectId": "stream/dt=2026-02-24/hour=21/part-0001",
@@ -46,7 +49,6 @@ class TestParseUnit:
         assert out["event_type"] is None
         assert out["prefix"] == "stream/dt=2026-02-24/hour=21/"
 
-
     @pytest.mark.parametrize(
         "attrs, missing_key",
         [
@@ -55,18 +57,18 @@ class TestParseUnit:
             ({}, "bucketId"),
         ],
     )
-    def test_parse_notification_raises_keyerror_when_required_missing(self, attrs, missing_key):
+    def test_parse_notification_raises_keyerror_when_required_missing(
+        self, attrs, missing_key
+    ):
         m = PubsubMessage(data=b"", attributes=attrs)
         with pytest.raises(KeyError):
             parse_notification(m)
-
 
     def test_parse_notification_attributes_none_raises_keyerror(self):
         # m.attributes is None -> attrs = {} -> KeyError for required keys
         m = PubsubMessage(data=b"", attributes=None)
         with pytest.raises(KeyError):
             parse_notification(m)
-
 
     def test_parse_notification_prefix_with_no_slash_in_objectid_is_root_prefix(self):
         attrs = {"bucketId": "b", "objectId": "file.parquet"}
@@ -87,7 +89,6 @@ class TestParseUnit:
     )
     def test_is_final_object(self, obj, expected):
         assert is_final_object({"object": obj}) is expected
-
 
     def test_is_final_object_missing_object_key_raises(self):
         with pytest.raises(KeyError):
