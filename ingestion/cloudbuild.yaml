@@ -1,0 +1,47 @@
+substitutions:
+  _REGION: "europe-west3"
+  _AR_REPO: "wiki-stream-analytics"
+  _IMAGE_NAME: "wiki-ingestion"
+  _TEMPLATE_BUCKET: "wiki-stream-analytics-dataflow-templates"
+  _TEMPLATE_PATH: "templates/wikistream_ingestion_flex.json"
+  _BEAM_VERSION: "2.61.0"
+  _TAG: "latest"
+
+steps:
+  # Build image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-f", "ingestion/Dockerfile.dataflow",
+        "--build-arg", "BEAM_VERSION=${_BEAM_VERSION}",
+        "-t", "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE_NAME}:${_TAG}",
+        "."
+      ]
+
+  # Push image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "push",
+        "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE_NAME}:${_TAG}"
+      ]
+
+  # Build flex template spec (JSON) and upload to GCS
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "dataflow",
+        "flex-template",
+        "build",
+        "gs://${_TEMPLATE_BUCKET}/${_TEMPLATE_PATH}",
+        "--image",
+        "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE_NAME}:${_TAG}",
+        "--sdk-language",
+        "PYTHON",
+        "--metadata-file",
+        "ingestion/dataflow/metadata.json"
+      ]
+
+images:
+  - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE_NAME}:${_TAG}"
