@@ -63,7 +63,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p "${DBT_PROFILES_DIR}"
-          printf "%s" "${{ secrets.DBT_PROFILES_YML }}" > "${DBT_PROFILES_DIR}/profiles.yml"
+          printf "%s" "${{ secrets.PROFILES_YML }}" > "${DBT_PROFILES_DIR}/profiles.yml"
 
       - name: Sync dbt env (uv)
         working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
