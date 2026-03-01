@@ -1,0 +1,77 @@
+name: dbt refresh (debug every minute)
+
+on:
+  schedule:
+    - cron: "*/5 * * * *" # минимум для GitHub Actions
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: dbt-refresh
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    name: refresh marts in BigQuery
+    environment: prod
+    runs-on: ubuntu-latest
+
+    env:
+      DBT_UV_PROJECT_DIR: dbt
+      DBT_PROJECT_REL_DIR: wikistream_analytics
+      DBT_VARS: '{"lookback_days": 7}'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.CI_SA_EMAIL }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Set DBT_PROFILES_DIR
+        shell: bash
+        run: |
+          echo "DBT_PROFILES_DIR=${RUNNER_TEMP}/dbt-profiles" >> "$GITHUB_ENV"
+
+      - name: Write dbt profiles.yml
+        shell: bash
+        run: |
+          mkdir -p "${DBT_PROFILES_DIR}"
+          printf "%s" "${{ secrets.PROFILES_YAML }}" > "${DBT_PROFILES_DIR}/profiles.yml"
+
+      - name: Sync dbt env (uv)
+        working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
+        run: uv sync --frozen
+
+      - name: dbt deps
+        working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
+        run: uv run dbt deps --project-dir ${{ env.DBT_PROJECT_REL_DIR }}
+
+      - name: Rebuild data every minute
+        working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run dbt build \
+            --project-dir ${{ env.DBT_PROJECT_REL_DIR }} \
+            --select marts+ \
+            --target dev
