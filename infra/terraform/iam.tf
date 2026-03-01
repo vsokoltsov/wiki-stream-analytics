@@ -274,3 +274,30 @@ resource "google_pubsub_subscription_iam_member" "dataflow_subscriber" {
   role         = "roles/pubsub.subscriber"
   member       = "serviceAccount:${google_service_account.dataflow_sa.email}"
 }
+
+resource "google_pubsub_subscription_iam_member" "dataflow_subscription_viewer" {
+  subscription = google_pubsub_subscription.datalake_objects_sub.name
+  role         = "roles/pubsub.viewer"
+  member       = "serviceAccount:${google_service_account.dataflow_sa.email}"
+}
+
+
+resource "google_bigquery_dataset_iam_member" "dbt_write_analytics" {
+  project    = var.project_id
+  dataset_id = google_bigquery_dataset.wiki_analytics.dataset_id
+  role       = "roles/bigquery.dataEditor"
+  member     = "serviceAccount:${google_service_account.dbt_sa.email}"
+}
+
+resource "google_bigquery_dataset_iam_member" "dbt_read_raw" {
+  project    = var.project_id
+  dataset_id = google_bigquery_dataset.raw.dataset_id
+  role       = "roles/bigquery.dataViewer"
+  member     = "serviceAccount:${google_service_account.dbt_sa.email}"
+}
+
+resource "google_project_iam_member" "dbt_job_user" {
+  project = var.project_id
+  role    = "roles/bigquery.jobUser"
+  member  = "serviceAccount:${google_service_account.dbt_sa.email}"
+}

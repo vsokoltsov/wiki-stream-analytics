@@ -21,3 +21,4 @@ terraform.tfvars
 terraform.tfstate
 terraform.tfstate.backup
 infra/k8s/charts/**/charts/
+logs/

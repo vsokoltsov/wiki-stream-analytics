@@ -3,7 +3,6 @@ resource "google_bigquery_dataset" "raw" {
   location   = var.location
 }
 
-# 2) Table (RAW/Staging)
 resource "google_bigquery_table" "events" {
   dataset_id = google_bigquery_dataset.raw.dataset_id
   table_id   = "recentchanges"
@@ -32,4 +31,10 @@ resource "google_bigquery_table" "events" {
   lifecycle {
     ignore_changes = [schema]
   }
+}
+
+resource "google_bigquery_dataset" "wiki_analytics" {
+  project    = var.project_id
+  dataset_id = "wikistream_analytics"
+  location   = "EU"
 }
