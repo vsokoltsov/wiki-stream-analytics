@@ -10,7 +10,6 @@ on:
     paths:
       - "dbt/**"
       - ".github/workflows/dbt.yml"
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -30,6 +29,17 @@ jobs:
       DBT_VARS: '{"lookback_days": 7}'
 
     steps:
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.CI_SA_EMAIL }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: "gke-gcloud-auth-plugin"
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -47,20 +57,6 @@ jobs:
         shell: bash
         run: |
           echo "DBT_PROFILES_DIR=${RUNNER_TEMP}/dbt-profiles" >> "$GITHUB_ENV"
-
-      - id: auth
-        uses: google-github-actions/auth@v3
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-          service_account: ${{ secrets.CI_SA_EMAIL }}
-
-      - uses: google-github-actions/setup-gcloud@v2
-        with:
-          install_components: "gke-gcloud-auth-plugin"
-
-      - name: Set up gcloud
-        uses: google-github-actions/setup-gcloud@v2
 
       - name: Write dbt profiles.yml (no keyfile)
         shell: bash
