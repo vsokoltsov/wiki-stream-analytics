@@ -1,0 +1,30 @@
+[0m17:01:11.253345 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10b67f6b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10be861b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10be85cd0>]}
+
+
+============================== 17:01:11.256449 | 9095c9d0-5df3-42f1-82e8-98f21fa50f2d ==============================
+[0m17:01:11.256449 [info ] [MainThread]: Running with dbt=1.11.6
+[0m17:01:11.256841 [debug] [MainThread]: running dbt with arguments {'static_parser': 'True', 'debug': 'False', 'no_print': 'None', 'quiet': 'False', 'cache_selected_only': 'False', 'introspect': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'empty': 'None', 'write_json': 'True', 'send_anonymous_usage_stats': 'True', 'warn_error': 'None', 'log_path': 'logs', 'use_colors': 'True', 'version_check': 'True', 'profiles_dir': '/Users/vadim.sokoltsov/.dbt', 'fail_fast': 'False', 'use_experimental_parser': 'False', 'printer_width': '80', 'log_format': 'default', 'log_cache_events': 'False', 'indirect_selection': 'eager', 'invocation_command': 'dbt init', 'partial_parse': 'True', 'target_path': 'None'}
+[0m17:01:29.126998 [debug] [MainThread]: Starter project path: /Users/vadim.sokoltsov/learning/wiki-stream-analytics/dbt/.venv/lib/python3.12/site-packages/dbt/include/starter_project
+[0m17:01:29.136506 [info ] [MainThread]: 
+Your new dbt project "wikistream_analytics" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m17:01:29.136808 [info ] [MainThread]: Setting up your profile.
+[0m17:03:03.270292 [info ] [MainThread]: Profile wikistream_analytics written to /Users/vadim.sokoltsov/.dbt/profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+[0m17:03:03.285475 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 112.0962, "process_in_blocks": "0", "process_kernel_time": 0.896787, "process_mem_max_rss": "378699776", "process_out_blocks": "0", "process_user_time": 2.712199}
+[0m17:03:03.286427 [debug] [MainThread]: Command `dbt init` succeeded at 17:03:03.286308 after 112.10 seconds
+[0m17:03:03.286903 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10be86120>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x11b2f3b90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x11ae61f70>]}
+[0m17:03:03.287377 [debug] [MainThread]: Flushing usage events
+[0m17:03:03.885355 [debug] [MainThread]: An error was encountered while trying to flush usage events
