@@ -120,3 +120,8 @@ output "dataflow_template_dir" {
   description = "Default folder for flex template specs"
   value       = "gs://${google_storage_bucket.dataflow_templates.name}/templates"
 }
+
+output "dataflow_worker_sa_email" {
+  description = "Dataflow worker service account email"
+  value       = google_service_account.dataflow_sa.email
+}

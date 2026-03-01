@@ -250,3 +250,27 @@ resource "google_project_iam_member" "gha_dataflow_developer" {
   role    = "roles/dataflow.developer"
   member  = "serviceAccount:${google_service_account.ci.email}"
 }
+
+resource "google_storage_bucket_iam_member" "gha_ci_templates_object_viewer" {
+  bucket = google_storage_bucket.dataflow_templates.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_service_account.ci.email}"
+}
+
+resource "google_service_account_iam_member" "gha_actas_dataflow_sa" {
+  service_account_id = google_service_account.dataflow_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.ci.email}"
+}
+
+resource "google_project_iam_member" "dataflow_ar_reader" {
+  project = var.project_id
+  role    = "roles/artifactregistry.reader"
+  member  = "serviceAccount:${google_service_account.dataflow_sa.email}"
+}
+
+resource "google_pubsub_subscription_iam_member" "dataflow_subscriber" {
+  subscription = google_pubsub_subscription.datalake_objects_sub.name
+  role         = "roles/pubsub.subscriber"
+  member       = "serviceAccount:${google_service_account.dataflow_sa.email}"
+}
