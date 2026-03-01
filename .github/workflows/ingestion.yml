@@ -150,6 +150,43 @@ jobs:
         with:
           install_components: "gke-gcloud-auth-plugin"
 
+      - name: Delete previous run
+        env:
+          JOB_PREFIX: "wikistream-ingestion-"
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          REGION: "europe-west1"
+        run: |
+          set -euo pipefail
+
+          echo ">> Cancel previous active Dataflow jobs with prefix ${JOB_PREFIX} in ${REGION}..."
+          ACTIVE_JOB_IDS="$(gcloud dataflow jobs list \
+            --project "${PROJECT_ID}" \
+            --region "${REGION}" \
+            --status=active \
+            --format='value(id,name)' \
+            | awk -v pfx="${JOB_PREFIX}" '$2 ~ "^"pfx {print $1}')"
+
+          if [ -n "${ACTIVE_JOB_IDS}" ]; then
+            echo "Found active jobs:"
+            gcloud dataflow jobs list \
+              --project "${PROJECT_ID}" \
+              --region "${REGION}" \
+              --status=active \
+              --format='table[box](id,name,state)' \
+              --filter="name:${JOB_PREFIX}*"
+
+            # 2) Отменить (cancel) — быстро завершает job
+            for JOB_ID in ${ACTIVE_JOB_IDS}; do
+              echo "Cancelling job: ${JOB_ID}"
+              gcloud dataflow jobs cancel "${JOB_ID}" \
+                --project "${PROJECT_ID}" \
+                --region "${REGION}" \
+                --quiet || true
+            done
+          else
+            echo "No active jobs found."
+          fi
+
       # - name: Get GKE credentials
       #   env:
       #     PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
