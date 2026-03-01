@@ -178,6 +178,19 @@ services:
       flink run -m jobmanager:8081 \
         -pym processing.app \
         -pyexec /opt/venv/bin/python
+  
+  beam-ingestion:
+    build:
+      context: .
+      dockerfile: ingestion/Dockerfile.local
+    env_file: .env
+    working_dir: /app
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp-service-account.json
+    volumes:
+      - ./ingestion:/app/ingestion
+      - ./secrets:/secrets:ro
+    command: ["python", "-m", "ingestion.app"]
 
 networks:
   flinknet:

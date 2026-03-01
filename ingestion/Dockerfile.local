@@ -1,20 +1,28 @@
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PATH="/root/.local/bin:${PATH}"
 
 WORKDIR /app
 
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc g++ \
+    gcc g++ curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml uv.lock* requirements.txt* /app/
-RUN pip install --no-cache-dir -U pip \
-    && if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; fi \
-    && if [ -f pyproject.toml ]; then pip install --no-cache-dir -e .; fi
+COPY pyproject.toml uv.lock* /app/
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+RUN uv --version
+
+# гарантированно ставим зависимости в system site-packages
+RUN uv export --frozen --group ingestion --format requirements-txt -o /tmp/requirements.txt \
+ && uv pip install --system -r /tmp/requirements.txt \
+ && rm -f /tmp/requirements.txt
 
 COPY ingestion/ /app/ingestion/
+
+# sanity check
+RUN python -c "import apache_beam as beam; print('beam', beam.__version__)"
 
 CMD ["python", "-m", "ingestion.app"]

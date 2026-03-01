@@ -5,7 +5,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class IngestionSettings(BaseSettings):
     PROJECT_ID: str
     GCS_BUCKET: str
-    PUBSUB_TOPIC: str
     PUBSUB_SUBSCRIPTION: str
     BQ_DATASET: str
     BQ_TABLE: str
