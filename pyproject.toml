@@ -42,6 +42,11 @@ producer = [
 pyarrow = ["setuptools<81"]
 grpcio-tools = ["setuptools<81"]
 
+[tool.uv.workspace]
+exclude = [
+    "dbt", "dbt/*"
+]
+
 [tool.pytest.ini_options]
 markers = [
     "unit: Unit tests (fast, no external services).",
