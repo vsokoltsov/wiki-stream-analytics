@@ -1,8 +1,8 @@
-name: dbt refresh (debug every minute)
+name: dbt refresh (every hour)
 
 on:
   schedule:
-    - cron: "*/5 * * * *" # минимум для GitHub Actions
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -66,7 +66,7 @@ jobs:
         working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
         run: uv run dbt deps --project-dir ${{ env.DBT_PROJECT_REL_DIR }}
 
-      - name: Rebuild data every minute
+      - name: Refresh data
         working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
         shell: bash
         run: |
