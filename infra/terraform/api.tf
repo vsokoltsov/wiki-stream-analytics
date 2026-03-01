@@ -21,6 +21,7 @@ resource "google_project_service" "serviceusage" {
 }
 
 resource "google_project_service" "compute" {
+  project = var.project_id
   service = "compute.googleapis.com"
 }
 
@@ -30,6 +31,7 @@ resource "google_project_service" "managedkafka" {
 }
 
 resource "google_project_service" "gke" {
+  project = var.project_id
   service = "container.googleapis.com"
 }
 
