@@ -4,12 +4,12 @@ on:
   pull_request:
     paths:
       - "dbt/**"
-      - ".github/workflows/dbt-ci.yml"
+      - ".github/workflows/dbt.yml"
   push:
     branches: ["main"]
     paths:
       - "dbt/**"
-      - ".github/workflows/dbt-ci.yml"
+      - ".github/workflows/dbt.yml"
   workflow_dispatch:
 
 permissions:
