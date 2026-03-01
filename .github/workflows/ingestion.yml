@@ -199,11 +199,10 @@ jobs:
           TEMP_LOCATION: ${{ vars.TEMP_LOCATION }}
           STAGING_LOCATION: ${{ vars.STAGING_LOCATION }}
           IMAGE_TAG: ${{ github.sha }}
-          SDK_IMAGE: europe-west3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/wiki-stream-analytics/${IMAGE_NAME}:${IMAGE_TAG}
-          DATAFLOW_WORKER_SA: dataflow-wikistream-sa@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com
+          DATAFLOW_WORKER_SA: ${{ secrets.DATAFLOW_WORKER_SA }}
         run: |
           set -euo pipefail
-
+          SDK_IMAGE="europe-west3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/wiki-stream-analytics/${IMAGE_NAME}:${IMAGE_TAG}"
           echo "sdk image is: $SDK_IMAGE"
 
           echo ">> Starting new Dataflow flex-template job..."
