@@ -238,3 +238,9 @@ resource "google_storage_bucket_iam_member" "templates_rw" {
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.dataflow_sa.email}"
 }
+
+resource "google_storage_bucket_iam_member" "cloudbuild_runner_templates_object_admin" {
+  bucket = google_storage_bucket.dataflow_templates.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.cloudbuild_runner.email}"
+}
