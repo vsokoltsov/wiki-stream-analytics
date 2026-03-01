@@ -10,6 +10,10 @@ from ingestion.pipeline.parse import parse_notification, is_final_object
 from ingestion.pipeline.map_fns import to_completeness_kv
 
 
+def mock_blob(name, size):
+    return MagicMock(name=name, size=size)
+
+
 @pytest.mark.integration
 class TestStabilityIntegration:
     """Integration tests: pipeline with WaitForFileStabilityDoFn and mocked GCS."""
@@ -55,7 +59,6 @@ class TestStabilityIntegration:
                 },
             ),
         ]
-        mock_blob = lambda name, size: MagicMock(name=name, size=size)
         mock_client = MagicMock()
         mock_client.bucket.return_value = MagicMock()
         mock_client.list_blobs.return_value = [

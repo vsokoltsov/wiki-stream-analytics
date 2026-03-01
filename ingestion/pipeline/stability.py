@@ -1,5 +1,6 @@
 import time
 import json
+from typing import Any, Protocol, cast
 import apache_beam as beam
 from apache_beam.transforms.userstate import (
     ReadModifyWriteStateSpec,
@@ -9,6 +10,15 @@ from apache_beam.transforms.userstate import (
 )
 from apache_beam.coders import VarIntCoder, StrUtf8Coder
 from google.cloud import storage
+
+
+class _ReadWriteState(Protocol):
+    def read(self) -> Any: ...
+    def write(self, value: Any) -> None: ...
+
+
+class _TimerParam(Protocol):
+    def set(self, timestamp: float) -> None: ...
 
 
 class WaitForFileStabilityDoFn(beam.DoFn):
@@ -35,7 +45,7 @@ class WaitForFileStabilityDoFn(beam.DoFn):
         self.project_id = project_id
         self.poll_every_sec = poll_every_sec
         self.stable_needed = stable_needed
-        self._storage_client = None
+        self._storage_client = storage.Client(project=self.project_id)
 
     def setup(self):
         self._storage_client = storage.Client(project=self.project_id)
@@ -81,6 +91,12 @@ class WaitForFileStabilityDoFn(beam.DoFn):
         if not obj.endswith("_SUCCESS"):
             return
 
+        saved_event_state = cast(_ReadWriteState, saved_event_state)
+        stable_state = cast(_ReadWriteState, stable_state)
+        last_count_state = cast(_ReadWriteState, last_count_state)
+        last_size_state = cast(_ReadWriteState, last_size_state)
+        timer = cast(_TimerParam, timer)
+
         # _SUCCESS: store event + start periodic checks
         saved_event_state.write(json.dumps(event))
 
@@ -99,6 +115,12 @@ class WaitForFileStabilityDoFn(beam.DoFn):
         stable_state=beam.DoFn.StateParam(stable_rounds),
         saved_event_state=beam.DoFn.StateParam(saved_event),
     ):
+
+        saved_event_state = cast(_ReadWriteState, saved_event_state)
+        stable_state = cast(_ReadWriteState, stable_state)
+        last_count_state = cast(_ReadWriteState, last_count_state)
+        last_size_state = cast(_ReadWriteState, last_size_state)
+        timer = cast(_TimerParam, timer)
 
         saved = saved_event_state.read()
         if not saved:
