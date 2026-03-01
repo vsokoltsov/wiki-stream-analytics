@@ -24,12 +24,6 @@ jobs:
   dbt-ci:
     name: dbt checks
     runs-on: ubuntu-latest
-
-    env:
-      DBT_UV_PROJECT_DIR: dbt
-      DBT_PROJECT_DIR: dbt/wikistream_analytics
-      DBT_VARS: '{"lookback_days": 7}'
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -75,25 +69,40 @@ jobs:
           YAML
 
       - name: Sync dbt env (uv)
+        env:
+          DBT_PROJECT_DIR: dbt/wikistream_analytics
         working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
         run: uv sync --frozen
 
       - name: dbt deps
+        env:
+          DBT_PROJECT_DIR: dbt/wikistream_analytics
         working-directory: ${{ env.DBT_PROJECT_DIR }}
         run: uv run --project .. dbt deps
 
       - name: dbt parse
+        env:
+          DBT_PROJECT_DIR: dbt/wikistream_analytics
+          DBT_VARS: '{"lookback_days": 7}'
         working-directory: ${{ env.DBT_PROJECT_DIR }}
         run: uv run --project .. dbt parse
 
       - name: dbt compile
+        env:
+          DBT_PROJECT_DIR: dbt/wikistream_analytics
+          DBT_VARS: '{"lookback_days": 7}'
         working-directory: ${{ env.DBT_PROJECT_DIR }}
         run: uv run --project .. dbt compile --vars "${DBT_VARS}" --target dev
 
       - name: dbt debug
+        env:
+          DBT_PROJECT_DIR: dbt/wikistream_analytics
         working-directory: ${{ env.DBT_PROJECT_DIR }}
         run: uv run --project .. dbt debug --target dev
 
       - name: dbt build (staging + tests)
+        env:
+          DBT_PROJECT_DIR: dbt/wikistream_analytics
+          DBT_VARS: '{"lookback_days": 7}'
         working-directory: ${{ env.DBT_PROJECT_DIR }}
         run: uv run --project .. dbt build --select staging+ --vars "${DBT_VARS}" --target dev
