@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - "ingestion/**"
-      - ".github/workflows/ingestion-ci.yml"
+      - ".github/workflows/ingestion.yml"
       - "pyproject.toml"
       - "uv.lock"
       - "Makefile"
@@ -14,7 +14,7 @@ on:
     branches: [main]
     paths:
       - "ingestion/**"
-      - ".github/workflows/ingestion-ci.yml"
+      - ".github/workflows/ingestion.yml"
       - "pyproject.toml"
       - "uv.lock"
       - "Makefile"
