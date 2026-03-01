@@ -21,25 +21,25 @@ variable "zone" {
   default     = "europe-west3-a"
 }
 
-variable "github_owner" { 
-  type = string 
+variable "github_owner" {
+  type = string
 }
-variable "github_repo"  { 
-  type = string 
+variable "github_repo" {
+  type = string
 }
 
-variable "wif_pool_id"     { 
-  type = string
-  default = "github" 
+variable "wif_pool_id" {
+  type    = string
+  default = "github"
 }
-variable "wif_provider_id" { 
-  type = string
-  default = "github-provider" 
+variable "wif_provider_id" {
+  type    = string
+  default = "github-provider"
 }
 
-variable "ci_sa_account_id" { 
-  type = string
-  default = "gha-ci" 
+variable "ci_sa_account_id" {
+  type    = string
+  default = "gha-ci"
 }
 
 variable "enable_k8s" {

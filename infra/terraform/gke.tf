@@ -27,8 +27,8 @@ resource "google_container_cluster" "gke" {
   secret_sync_config {
     enabled = true
   }
-  
-  depends_on = [google_project_service.gke]
+
+  depends_on          = [google_project_service.gke]
   deletion_protection = false
 }
 

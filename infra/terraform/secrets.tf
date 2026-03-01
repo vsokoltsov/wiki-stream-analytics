@@ -31,9 +31,9 @@ resource "google_secret_manager_secret" "kafka_bootstrap" {
 
 resource "google_secret_manager_secret" "kafka_bootstrap_mtls" {
   secret_id = "kafka_bootstrap_mtls"
-  replication { 
-    auto {} 
-    }
+  replication {
+    auto {}
+  }
 }
 
 resource "google_secret_manager_secret_version" "kafka_bootstrap_v1" {
@@ -49,7 +49,7 @@ resource "google_secret_manager_secret_version" "kafka_bootstrap_v1" {
 resource "google_secret_manager_secret_version" "kafka_bootstrap_mtls_v1" {
   secret      = google_secret_manager_secret.kafka_bootstrap_mtls.id
   secret_data = local.kafka_bootstrap_mtls
-  depends_on  = [
+  depends_on = [
     google_managed_kafka_cluster.kafka,
     google_project_service.secretmanager
   ]

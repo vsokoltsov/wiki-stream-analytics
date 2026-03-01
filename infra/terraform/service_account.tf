@@ -1,5 +1,5 @@
 resource "google_service_account" "ci" {
-  account_id   = var.ci_sa_account_id   # e.g. "gha-ci"
+  account_id   = var.ci_sa_account_id # e.g. "gha-ci"
   display_name = "GitHub Actions CI"
 }
 

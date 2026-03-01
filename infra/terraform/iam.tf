@@ -3,13 +3,13 @@ data "google_project" "this" {
 }
 
 locals {
-  gha_ci_sa = "serviceAccount:gha-ci@${var.project_id}.iam.gserviceaccount.com"
+  gha_ci_sa           = "serviceAccount:gha-ci@${var.project_id}.iam.gserviceaccount.com"
   cloudbuild_sa_email = "${data.google_project.this.number}@cloudbuild.gserviceaccount.com"
-  
+
 }
 
 resource "google_iam_workload_identity_pool" "github" {
-  workload_identity_pool_id = var.wif_pool_id           # e.g. "github"
+  workload_identity_pool_id = var.wif_pool_id # e.g. "github"
   display_name              = "GitHub Actions Pool"
   description               = "OIDC federation for GitHub Actions"
   disabled                  = false
@@ -18,7 +18,7 @@ resource "google_iam_workload_identity_pool" "github" {
 # 2) Workload Identity Provider (OIDC)
 resource "google_iam_workload_identity_pool_provider" "github" {
   workload_identity_pool_id          = google_iam_workload_identity_pool.github.workload_identity_pool_id
-  workload_identity_pool_provider_id = var.wif_provider_id              # e.g. "github-provider"
+  workload_identity_pool_provider_id = var.wif_provider_id # e.g. "github-provider"
   display_name                       = "GitHub OIDC Provider"
   description                        = "Trust GitHub OIDC tokens"
 
@@ -28,11 +28,11 @@ resource "google_iam_workload_identity_pool_provider" "github" {
 
   # Map GitHub OIDC claims -> attributes you can use in conditions / IAM bindings
   attribute_mapping = {
-    "google.subject"           = "assertion.sub"
-    "attribute.repository"     = "assertion.repository"
+    "google.subject"             = "assertion.sub"
+    "attribute.repository"       = "assertion.repository"
     "attribute.repository_owner" = "assertion.repository_owner"
-    "attribute.ref"            = "assertion.ref"
-    "attribute.actor"          = "assertion.actor"
+    "attribute.ref"              = "assertion.ref"
+    "attribute.actor"            = "assertion.actor"
   }
 
   # Lock to a specific repo (recommended)
@@ -139,13 +139,13 @@ resource "google_project_iam_member" "processing_kafka" {
 resource "google_service_account_iam_member" "producer_wi" {
   service_account_id = google_service_account.producer_sa.name
   role               = "roles/iam.workloadIdentityUser"
-  member = "serviceAccount:${var.project_id}.svc.id.goog[wikistream/producer-sa]"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[wikistream/producer-sa]"
 }
 
 resource "google_service_account_iam_member" "processing_wi" {
   service_account_id = google_service_account.processing_sa.name
   role               = "roles/iam.workloadIdentityUser"
-  member = "serviceAccount:${var.project_id}.svc.id.goog[wikistream/processing-sa]"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[wikistream/processing-sa]"
 }
 
 resource "google_project_iam_member" "gke_nodes_log_writer" {
@@ -179,7 +179,7 @@ resource "google_project_iam_member" "processing_secret_accessor" {
 }
 
 data "google_storage_project_service_account" "gcs" {
-  project = var.project_id
+  project    = var.project_id
   depends_on = [google_project_service.storage]
 }
 

@@ -42,7 +42,7 @@ resource "google_storage_bucket" "dataflow_staging" {
 
   lifecycle_rule {
     condition { age = 7 }
-    action    { type = "Delete" }
+    action { type = "Delete" }
   }
 }
 
@@ -54,7 +54,7 @@ resource "google_storage_bucket" "dataflow_temp" {
 
   lifecycle_rule {
     condition { age = 7 }
-    action    { type = "Delete" }
+    action { type = "Delete" }
   }
 }
 
@@ -66,6 +66,6 @@ resource "google_storage_bucket" "dataflow_templates" {
 
   lifecycle_rule {
     condition { age = 30 }
-    action    { type = "Delete" }
+    action { type = "Delete" }
   }
 }
