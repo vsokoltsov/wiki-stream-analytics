@@ -45,7 +45,7 @@ class WaitForFileStabilityDoFn(beam.DoFn):
         self.project_id = project_id
         self.poll_every_sec = poll_every_sec
         self.stable_needed = stable_needed
-        self._storage_client = storage.Client(project=self.project_id)
+        self._storage_client: storage.Client
 
     def setup(self):
         self._storage_client = storage.Client(project=self.project_id)
