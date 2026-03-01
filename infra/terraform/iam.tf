@@ -244,3 +244,9 @@ resource "google_storage_bucket_iam_member" "cloudbuild_runner_templates_object_
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.cloudbuild_runner.email}"
 }
+
+resource "google_project_iam_member" "gha_dataflow_developer" {
+  project = var.project_id
+  role    = "roles/dataflow.developer"
+  member  = "serviceAccount:${google_service_account.ci.email}"
+}
