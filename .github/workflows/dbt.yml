@@ -1,11 +1,10 @@
-name: CI (dbt)
+name: dbt CI
 
 on:
   pull_request:
     paths:
       - "dbt/**"
       - ".github/workflows/dbt-ci.yml"
-
   push:
     branches: ["main"]
     paths:
@@ -15,7 +14,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write  # нужно для OIDC
+  id-token: write
 
 concurrency:
   group: dbt-ci-${{ github.ref }}
@@ -28,12 +27,7 @@ jobs:
     env:
       DBT_UV_PROJECT_DIR: dbt
       DBT_PROJECT_DIR: dbt/wikistream_analytics
-      DBT_PROFILES_DIR: ${{ runner.temp }}/dbt-profiles
-
       DBT_VARS: '{"lookback_days": 7}'
-
-      # твой gcp project id
-      GCP_PROJECT_ID: wiki-stream-analytics
 
     steps:
       - name: Checkout
@@ -49,62 +43,61 @@ jobs:
         with:
           enable-cache: true
 
-      # OIDC auth -> Workload Identity Federation -> SA impersonation
-      - name: auth
-        uses: google-github-actions/auth@v3
+      - name: Set env vars
+        shell: bash
+        run: |
+          echo "DBT_PROFILES_DIR=${RUNNER_TEMP}/dbt-profiles" >> "$GITHUB_ENV"
+
+      - name: Authenticate to Google Cloud (OIDC)
+        uses: google-github-actions/auth@v2
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-          service_account: ${{ secrets.CI_SA_EMAIL }}
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          token_format: "access_token"
 
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v2
 
-      # dbt будет использовать ADC (Application Default Credentials) от auth step
-      # profiles.yml создаём без keyfile
       - name: Write dbt profiles.yml (no keyfile)
         shell: bash
         run: |
           mkdir -p "${DBT_PROFILES_DIR}"
-          cat > "${DBT_PROFILES_DIR}/profiles.yml" << ${{ secrets.PROFILES_YML }}
-          echo "profiles.yml written to ${DBT_PROFILES_DIR}"
+          cat > "${DBT_PROFILES_DIR}/profiles.yml" << 'YAML'
+          wikistream_analytics:
+            target: dev
+            outputs:
+              dev:
+                type: bigquery
+                method: oauth
+                project: wiki-stream-analytics
+                dataset: wikistream_analytics
+                location: EU
+                threads: 2
+                priority: interactive
+                job_execution_timeout_seconds: 300
+                job_retries: 1
+          YAML
 
       - name: Sync dbt env (uv)
         working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
-        run: |
-          uv sync --frozen
+        run: uv sync --frozen
 
       - name: dbt deps
         working-directory: ${{ env.DBT_PROJECT_DIR }}
-        run: |
-          uv run --project .. dbt deps
+        run: uv run --project .. dbt deps
 
-      - name: dbt parse (syntax & project structure)
+      - name: dbt parse
         working-directory: ${{ env.DBT_PROJECT_DIR }}
-        run: |
-          uv run --project .. dbt parse
+        run: uv run --project .. dbt parse
 
       - name: dbt compile
         working-directory: ${{ env.DBT_PROJECT_DIR }}
-        run: |
-          uv run --project .. dbt compile --vars "${DBT_VARS}" --target dev
+        run: uv run --project .. dbt compile --vars "${DBT_VARS}" --target dev
 
-      - name: dbt debug (connection)
+      - name: dbt debug
         working-directory: ${{ env.DBT_PROJECT_DIR }}
-        run: |
-          uv run --project .. dbt debug --target dev
+        run: uv run --project .. dbt debug --target dev
 
       - name: dbt build (staging + tests)
         working-directory: ${{ env.DBT_PROJECT_DIR }}
-        run: |
-          uv run --project .. dbt build --select staging+ --vars "${DBT_VARS}" --target dev
-
-      - name: Upload dbt artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: dbt-artifacts
-          path: |
-            ${{ env.DBT_PROJECT_DIR }}/target/**
-            ${{ env.DBT_PROJECT_DIR }}/logs/**
-          if-no-files-found: warn
+        run: uv run --project .. dbt build --select staging+ --vars "${DBT_VARS}" --target dev
