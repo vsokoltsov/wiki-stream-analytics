@@ -301,3 +301,25 @@ resource "google_project_iam_member" "dbt_job_user" {
   role    = "roles/bigquery.jobUser"
   member  = "serviceAccount:${google_service_account.dbt_sa.email}"
 }
+
+resource "google_project_iam_member" "ci_bigquery_job_user" {
+  project = var.project_id
+  role    = "roles/bigquery.jobUser"
+  member  = "serviceAccount:${google_service_account.ci.email}"
+}
+
+resource "google_bigquery_dataset_iam_member" "ci_raw_viewer" {
+  project    = var.project_id
+  dataset_id = google_bigquery_dataset.raw.dataset_id
+
+  role   = "roles/bigquery.dataViewer"
+  member = "serviceAccount:${google_service_account.ci.email}"
+}
+
+resource "google_bigquery_dataset_iam_member" "ci_marts_editor" {
+  project    = var.project_id
+  dataset_id = google_bigquery_dataset.wiki_analytics.dataset_id
+
+  role   = "roles/bigquery.dataEditor"
+  member = "serviceAccount:${google_service_account.ci.email}"
+}
