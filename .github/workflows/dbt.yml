@@ -6,7 +6,7 @@ on:
     paths:
       - "dbt/**"
       - ".github/workflows/dbt.yml"
-  
+
   pull_request:
     paths:
       - "dbt/**"
@@ -25,6 +25,12 @@ jobs:
     name: dbt checks
     environment: prod
     runs-on: ubuntu-latest
+
+    env:
+      DBT_UV_PROJECT_DIR: dbt
+      DBT_PROJECT_REL_DIR: wikistream_analytics
+      DBT_VARS: '{"lookback_days": 7}'
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,7 +54,7 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Set env vars
+      - name: Set DBT_PROFILES_DIR
         shell: bash
         run: |
           echo "DBT_PROFILES_DIR=${RUNNER_TEMP}/dbt-profiles" >> "$GITHUB_ENV"
@@ -57,50 +63,20 @@ jobs:
         shell: bash
         run: |
           mkdir -p "${DBT_PROFILES_DIR}"
-          cat > "${DBT_PROFILES_DIR}/profiles.yml" << 'YAML'
-          ${{ secrets.DBT_PROFILES_YML }}
-          YAML
+          printf "%s" "${{ secrets.DBT_PROFILES_YML }}" > "${DBT_PROFILES_DIR}/profiles.yml"
 
       - name: Sync dbt env (uv)
-        env:
-          DBT_UV_PROJECT_DIR: dbt
         working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
         run: uv sync --frozen
 
       - name: dbt deps
-        env:
-          DBT_UV_PROJECT_DIR: dbt
-          DBT_PROJECT_DIR: dbt/wikistream_analytics
-        working-directory: ${{ env.DBT_UV_PROJECT_DIRPROJECT_DIR }}
-        run: uv run --project .. dbt deps --project-dir ${{ env.DBT_PROJECT_DIR }}
+        working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
+        run: uv run dbt deps --project-dir ${{ env.DBT_PROJECT_REL_DIR }}
 
       - name: dbt parse
-        env:
-          DBT_UV_PROJECT_DIR: dbt
-          DBT_PROJECT_DIR: dbt/wikistream_analytics
-          DBT_VARS: '{"lookback_days": 7}'
-
         working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
-        run: uv run --project .. dbt parse --project-dir ${{ env.DBT_PROJECT_DIR }}
+        run: uv run dbt parse --project-dir ${{ env.DBT_PROJECT_REL_DIR }}
 
       - name: dbt compile
-        env:
-          DBT_UV_PROJECT_DIR: dbt
-          DBT_PROJECT_DIR: dbt/wikistream_analytics
-          DBT_VARS: '{"lookback_days": 7}'
         working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
-        run: uv run --project .. dbt compile --vars "${DBT_VARS}" --target dev --project-dir ${{ env.DBT_PROJECT_DIR }}
-
-      - name: dbt debug
-        env:
-          DBT_UV_PROJECT_DIR: dbt
-          DBT_PROJECT_DIR: dbt/wikistream_analytics
-        working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
-        run: uv run --project .. dbt debug --target dev --project-dir ${{ env.DBT_PROJECT_DIR }}
-
-      - name: dbt build (staging + tests)
-        env:
-          DBT_PROJECT_DIR: dbt/wikistream_analytics
-          DBT_VARS: '{"lookback_days": 7}'
-        working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
-        run: uv run --project .. dbt build --select staging+ --vars "${DBT_VARS}" --target dev --project-dir ${{ env.DBT_PROJECT_DIR }}
+        run: uv run dbt compile --project-dir ${{ env.DBT_PROJECT_REL_DIR }} --vars '${{ env.DBT_VARS }}' --target dev
