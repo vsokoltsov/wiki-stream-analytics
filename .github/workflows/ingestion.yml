@@ -193,11 +193,11 @@ jobs:
           IMAGE_NAME: "wiki-ingestion"
           PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           REGION: "europe-west1"
-          TEMPLATE_GCS: ${{ env.TEMPLATE_GCS }}
-          SUBSCRIPTION: ${{ env.PUBSUB_SUBSCRIPTION }}
-          TABLE_ID: ${{ env.BIGQUERY_TABLE_ID }}
-          TEMP_LOCATION: ${{ env.TEMP_LOCATION }}
-          STAGING_LOCATION: ${{ env.STAGING_LOCATION }}
+          TEMPLATE_GCS: ${{ vars.TEMPLATE_GCS }}
+          SUBSCRIPTION: ${{ vars.PUBSUB_SUBSCRIPTION }}
+          TABLE_ID: ${{ vars.BIGQUERY_TABLE_ID }}
+          TEMP_LOCATION: ${{ vars.TEMP_LOCATION }}
+          STAGING_LOCATION: ${{ vars.STAGING_LOCATION }}
           IMAGE_TAG: ${{ github.sha }}
           SDK_IMAGE: europe-west3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/wiki-stream-analytics/${IMAGE_NAME}:${IMAGE_TAG}
         run: |
