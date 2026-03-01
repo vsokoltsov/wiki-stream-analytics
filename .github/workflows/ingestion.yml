@@ -200,8 +200,11 @@ jobs:
           STAGING_LOCATION: ${{ vars.STAGING_LOCATION }}
           IMAGE_TAG: ${{ github.sha }}
           SDK_IMAGE: europe-west3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/wiki-stream-analytics/${IMAGE_NAME}:${IMAGE_TAG}
+          DATAFLOW_WORKER_SA: dataflow-wikistream-sa@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com
         run: |
           set -euo pipefail
+
+          echo "sdk image is: $SDK_IMAGE"
 
           echo ">> Starting new Dataflow flex-template job..."
 
@@ -210,6 +213,7 @@ jobs:
           gcloud dataflow flex-template run "${NEW_JOB_NAME}" \
             --project "${PROJECT_ID}" \
             --region "${REGION}" \
+            --service-account-email "${DATAFLOW_WORKER_SA}" \
             --template-file-gcs-location "gs://${TEMPLATE_GCS}" \
             --num-workers 2 \
             --max-workers 4 \
