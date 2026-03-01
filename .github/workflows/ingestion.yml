@@ -210,15 +210,15 @@ jobs:
           gcloud dataflow flex-template run "${NEW_JOB_NAME}" \
             --project "${PROJECT_ID}" \
             --region "${REGION}" \
-            --template-file-gcs-location "${TEMPLATE_GCS}" \
+            --template-file-gcs-location "gs://${TEMPLATE_GCS}" \
             --num-workers 2 \
             --max-workers 4 \
             --worker-machine-type "e2-standard-2" \
             --parameters project="${PROJECT_ID}" \
             --parameters subscription="${SUBSCRIPTION}" \
             --parameters table_id="${TABLE_ID}" \
-            --parameters temp_location="${TEMP_LOCATION}" \
-            --parameters staging_location="${STAGING_LOCATION}" \
+            --parameters temp_location="gs://${TEMP_LOCATION}" \
+            --parameters staging_location="gs://${STAGING_LOCATION}" \
             --parameters sdk_container_image="${SDK_IMAGE}" \
             --additional-pipeline-options="sdk_container_image=${SDK_IMAGE}"
 
