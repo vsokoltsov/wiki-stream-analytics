@@ -1,3 +1,7 @@
+serviceAccount: projects/$PROJECT_ID/serviceAccounts/cloudbuild-runner@$PROJECT_ID.iam.gserviceaccount.com
+options:
+  logging: CLOUD_LOGGING_ONLY
+
 substitutions:
   _REGION: "europe-west3"
   _AR_REPO: "wiki-stream-analytics"
