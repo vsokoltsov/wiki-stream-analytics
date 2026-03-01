@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: stg_recentchange
+    columns:
+      - name: event_ts
+        tests: [not_null]
+      - name: event_date
+        tests: [not_null]
+      - name: wiki
+      - name: type
+      - name: user_name
+      - name: bot
+      - name: title
+      - name: namespace_id

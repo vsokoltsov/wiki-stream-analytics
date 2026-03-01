@@ -1,0 +1,14 @@
+version: 2
+
+sources:
+  - name: raw
+    database: wiki-stream-analytics
+    schema: wikistream_raw
+    tables:
+      - name: recentchanges
+        columns:
+          - name: event_ts
+            tests:
+              - not_null:
+                  config:
+                    where: "event_ts >= timestamp_sub(current_timestamp(), interval 30 day)"

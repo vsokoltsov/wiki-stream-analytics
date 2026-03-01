@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: dashboard_daily_counts
+    columns:
+      - name: event_date
+        tests: [not_null, unique]
+
+  - name: dist_by_type
+    columns:
+      - name: event_type
+        tests: [not_null]
+      - name: events_total
+        tests: [not_null]
+  
+  - name: dist_bot_vs_human
+    columns:
+      - name: actor_type
+        tests: [not_null]
+      - name: events_total
+        tests: [not_null]
+
+  - name: dist_by_namespace
+    columns:
+      - name: namespace_id
+        tests: [not_null]
+      - name: events_total
+        tests: [not_null]
+
+  - name: ts_events_daily
+    columns:
+      - name: event_date
+        tests: [not_null, unique]
+      - name: events_total
+        tests: [not_null]
+
+  - name: ts_events_hourly
+    columns:
+      - name: event_hour
+        tests: [not_null, unique]
+      - name: events_total
+        tests: [not_null]
+
+  - name: ts_bot_vs_human_daily
+    columns:
+      - name: event_date
+        tests: [not_null, unique]
+      - name: bot_events
+        tests: [not_null]
+      - name: human_events
+        tests: [not_null]
+
+  - name: top_pages_by_edits
+    columns:
+      - name: title
+        tests: [not_null]
+      - name: edits
+        tests: [not_null]
