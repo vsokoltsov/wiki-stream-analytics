@@ -2,7 +2,7 @@ name: dbt refresh (every hour)
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 1 * * *"
   workflow_dispatch:
 
 permissions:
