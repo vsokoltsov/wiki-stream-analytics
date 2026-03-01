@@ -1,10 +1,19 @@
+{{ 
+  config(
+    materialized = 'table',
+    partition_by = {
+      "field": "event_date",
+      "data_type": "date"
+    },
+    cluster_by = ["wiki", "event_type", "namespace_id"]
+  ) 
+}}
 with src as (
   select
     cast(event_ts as timestamp) as event_ts,
     cast(event_ts as date)      as event_date,
     timestamp_trunc(cast(event_ts as timestamp), hour) as event_hour,
 
-    -- ниже примеры: подстрой под твои реальные колонки
     cast(wiki as string)        as wiki,
     cast(type as string)        as event_type,
     cast(user_name as string)        as user_name,
