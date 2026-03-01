@@ -1,12 +1,13 @@
 name: dbt CI
 
 on:
-  pull_request:
+  push:
+    branches: ["main"]
     paths:
       - "dbt/**"
       - ".github/workflows/dbt.yml"
-  push:
-    branches: ["main"]
+  
+  pull_request:
     paths:
       - "dbt/**"
       - ".github/workflows/dbt.yml"
@@ -21,6 +22,8 @@ concurrency:
 
 jobs:
   dbt-ci:
+    name: dbt checks
+    environment: dev
     runs-on: ubuntu-latest
 
     env:
@@ -29,6 +32,9 @@ jobs:
       DBT_VARS: '{"lookback_days": 7}'
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - id: auth
         uses: google-github-actions/auth@v3
         with:
@@ -39,9 +45,6 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2
         with:
           install_components: "gke-gcloud-auth-plugin"
-
-      - name: Checkout
-        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -62,7 +65,9 @@ jobs:
         shell: bash
         run: |
           mkdir -p "${DBT_PROFILES_DIR}"
-          cat > "${DBT_PROFILES_DIR}/profiles.yml" << ${{ secrets.DBT_PROFILES_YML }}
+          cat > "${DBT_PROFILES_DIR}/profiles.yml" << 'YAML'
+          ${{ secrets.DBT_PROFILES_YML }}
+          YAML
 
       - name: Sync dbt env (uv)
         working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
