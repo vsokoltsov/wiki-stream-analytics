@@ -1,4 +1,4 @@
-name: dbt CI
+name: CI (dbt)
 
 on:
   push:
@@ -23,7 +23,6 @@ concurrency:
 jobs:
   dbt-ci:
     name: dbt checks
-    environment: dev
     runs-on: ubuntu-latest
 
     env:
@@ -35,6 +34,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check WIF inputs present
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.WIF_PROVIDER }}" ]; then echo "WIF_PROVIDER is empty/unavailable"; exit 1; fi
+          if [ -z "${{ secrets.CI_SA_EMAIL }}" ]; then echo "CI_SA_EMAIL is empty/unavailable"; exit 1; fi
+          if [ -z "${{ secrets.GCP_PROJECT_ID }}" ]; then echo "GCP_PROJECT_ID is empty/unavailable"; exit 1; fi
+          echo "WIF inputs present"
+
       - id: auth
         uses: google-github-actions/auth@v3
         with:
@@ -43,8 +50,6 @@ jobs:
           service_account: ${{ secrets.CI_SA_EMAIL }}
 
       - uses: google-github-actions/setup-gcloud@v2
-        with:
-          install_components: "gke-gcloud-auth-plugin"
 
       - name: Set up Python
         uses: actions/setup-python@v5
