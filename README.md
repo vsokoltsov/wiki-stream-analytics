@@ -141,6 +141,125 @@ This approach better reflects modern production-grade data platforms where real-
 └──────────────────────────────────────────────┘
 ```
 
+
+## Data Warehouse
+
+Data Warehouse Optimization
+
+BigQuery is used as the analytical data warehouse.
+Tables are explicitly partitioned and clustered based on expected upstream query patterns and data characteristics.
+
+⸻
+
+### 1️⃣ Raw Layer (wikistream_raw.recentchanges)
+
+#### Partitioning
+
+The raw ingestion table is provisioned via Terraform and optimized as follows:
+
+```terraform
+time_partitioning {
+  type  = "DAY"
+  field = "event_ts"
+}
+
+require_partition_filter = true
+```
+
+##### Why partition by event_ts (DAY)?
+
+* The dataset is a continuous, unbounded event stream.
+* Most analytical queries filter by time window (e.g., last 7 days, last 30 days).
+* Partitioning by event timestamp ensures:
+* Reduced data scanned
+* Lower query cost
+* Improved performance
+* require_partition_filter = true prevents accidental full-table scans.
+
+This is the natural partitioning strategy for streaming event data.
+
+#### Clustering
+
+```
+clustering = ["wiki", "namespace_id"]
+```
+
+##### Why cluster by wiki and namespace_id?
+
+Typical upstream queries:
+* Filter by specific wiki (enwiki, dewiki, etc.)
+* Analyze edits per namespace
+* Aggregate events by wiki + namespace
+* Group by wiki
+
+Clustering on these fields:
+* Physically co-locates related rows within partitions
+* Reduces scanned blocks when filtering by wiki or namespace
+* Improves performance of grouped aggregations
+
+These fields have:
+* Moderate cardinality
+* High analytical relevance
+* Frequent usage in WHERE / GROUP BY clauses
+
+### 2️⃣ Staging Layer (stg_recentchange)
+
+The staging table is built via dbt and further optimized:
+
+```
+{{ 
+  config(
+    materialized = 'table',
+    partition_by = {
+      "field": "event_date",
+      "data_type": "date"
+    },
+    cluster_by = ["wiki", "event_type", "namespace_id"]
+  ) 
+}}
+```
+
+#### Partitioning by event_date
+* Derived from event_ts
+* Keeps time-based filtering efficient
+* Aligns with common reporting dimensions (daily metrics)
+
+Staging queries frequently apply rolling window filters (e.g., last 30 days), so date partitioning significantly reduces scan size.
+
+#### Clustering by wiki, event_type, namespace_id
+
+These fields are used in:
+* Aggregations
+* Filtering
+* Mart calculations
+* BI-style grouping
+
+Example aggregation:
+
+```
+group by wiki, event_type, event_date
+```
+
+Clustering improves performance for:
+* `WHERE wiki = 'enwiki'`
+* `WHERE event_type = 'edit'`
+* Namespace-level analytics
+* Multi-dimensional aggregations
+
+This ensures physical data layout matches analytical access patterns.
+
+### 3️⃣ Mart Layer (Views)
+
+Mart models are implemented as views over the staging table.
+
+Rationale
+* The staging table is already partitioned and clustered.
+* Views reuse optimized underlying storage.
+* No data duplication.
+* Keeps transformations lightweight.
+
+If usage patterns evolve (e.g., BI dashboards with heavy repeated queries), marts can be materialized as partitioned & clustered tables.
+
 ## Deployment
 
 ### Prerequisites
