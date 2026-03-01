@@ -23,6 +23,7 @@ concurrency:
 jobs:
   dbt-ci:
     name: dbt checks
+    environment: prod
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
