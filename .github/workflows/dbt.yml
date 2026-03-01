@@ -29,14 +29,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check WIF inputs present
-        shell: bash
-        run: |
-          if [ -z "${{ secrets.WIF_PROVIDER }}" ]; then echo "WIF_PROVIDER is empty/unavailable"; exit 1; fi
-          if [ -z "${{ secrets.CI_SA_EMAIL }}" ]; then echo "CI_SA_EMAIL is empty/unavailable"; exit 1; fi
-          if [ -z "${{ secrets.GCP_PROJECT_ID }}" ]; then echo "GCP_PROJECT_ID is empty/unavailable"; exit 1; fi
-          echo "WIF inputs present"
-
       - id: auth
         uses: google-github-actions/auth@v3
         with:
@@ -79,31 +71,31 @@ jobs:
         env:
           DBT_PROJECT_DIR: dbt/wikistream_analytics
         working-directory: ${{ env.DBT_PROJECT_DIR }}
-        run: uv run --project .. dbt deps
+        run: uv run --project .. dbt deps --project-dir ${{ env.DBT_PROJECT_DIR }}
 
       - name: dbt parse
         env:
           DBT_PROJECT_DIR: dbt/wikistream_analytics
           DBT_VARS: '{"lookback_days": 7}'
         working-directory: ${{ env.DBT_PROJECT_DIR }}
-        run: uv run --project .. dbt parse
+        run: uv run --project .. dbt parse --project-dir ${{ env.DBT_PROJECT_DIR }}
 
       - name: dbt compile
         env:
           DBT_PROJECT_DIR: dbt/wikistream_analytics
           DBT_VARS: '{"lookback_days": 7}'
         working-directory: ${{ env.DBT_PROJECT_DIR }}
-        run: uv run --project .. dbt compile --vars "${DBT_VARS}" --target dev
+        run: uv run --project .. dbt compile --vars "${DBT_VARS}" --target dev --project-dir ${{ env.DBT_PROJECT_DIR }}
 
       - name: dbt debug
         env:
           DBT_PROJECT_DIR: dbt/wikistream_analytics
         working-directory: ${{ env.DBT_PROJECT_DIR }}
-        run: uv run --project .. dbt debug --target dev
+        run: uv run --project .. dbt debug --target dev --project-dir ${{ env.DBT_PROJECT_DIR }}
 
       - name: dbt build (staging + tests)
         env:
           DBT_PROJECT_DIR: dbt/wikistream_analytics
           DBT_VARS: '{"lookback_days": 7}'
         working-directory: ${{ env.DBT_PROJECT_DIR }}
-        run: uv run --project .. dbt build --select staging+ --vars "${DBT_VARS}" --target dev
+        run: uv run --project .. dbt build --select staging+ --vars "${DBT_VARS}" --target dev --project-dir ${{ env.DBT_PROJECT_DIR }}
