@@ -63,39 +63,44 @@ jobs:
 
       - name: Sync dbt env (uv)
         env:
-          DBT_PROJECT_DIR: dbt/wikistream_analytics
+          DBT_UV_PROJECT_DIR: dbt
         working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
         run: uv sync --frozen
 
       - name: dbt deps
         env:
+          DBT_UV_PROJECT_DIR: dbt
           DBT_PROJECT_DIR: dbt/wikistream_analytics
-        working-directory: ${{ env.DBT_PROJECT_DIR }}
+        working-directory: ${{ env.DBT_UV_PROJECT_DIRPROJECT_DIR }}
         run: uv run --project .. dbt deps --project-dir ${{ env.DBT_PROJECT_DIR }}
 
       - name: dbt parse
         env:
+          DBT_UV_PROJECT_DIR: dbt
           DBT_PROJECT_DIR: dbt/wikistream_analytics
           DBT_VARS: '{"lookback_days": 7}'
-        working-directory: ${{ env.DBT_PROJECT_DIR }}
+
+        working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
         run: uv run --project .. dbt parse --project-dir ${{ env.DBT_PROJECT_DIR }}
 
       - name: dbt compile
         env:
+          DBT_UV_PROJECT_DIR: dbt
           DBT_PROJECT_DIR: dbt/wikistream_analytics
           DBT_VARS: '{"lookback_days": 7}'
-        working-directory: ${{ env.DBT_PROJECT_DIR }}
+        working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
         run: uv run --project .. dbt compile --vars "${DBT_VARS}" --target dev --project-dir ${{ env.DBT_PROJECT_DIR }}
 
       - name: dbt debug
         env:
+          DBT_UV_PROJECT_DIR: dbt
           DBT_PROJECT_DIR: dbt/wikistream_analytics
-        working-directory: ${{ env.DBT_PROJECT_DIR }}
+        working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
         run: uv run --project .. dbt debug --target dev --project-dir ${{ env.DBT_PROJECT_DIR }}
 
       - name: dbt build (staging + tests)
         env:
           DBT_PROJECT_DIR: dbt/wikistream_analytics
           DBT_VARS: '{"lookback_days": 7}'
-        working-directory: ${{ env.DBT_PROJECT_DIR }}
+        working-directory: ${{ env.DBT_UV_PROJECT_DIR }}
         run: uv run --project .. dbt build --select staging+ --vars "${DBT_VARS}" --target dev --project-dir ${{ env.DBT_PROJECT_DIR }}
