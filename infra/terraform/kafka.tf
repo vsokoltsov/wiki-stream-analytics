@@ -11,7 +11,7 @@ resource "google_managed_kafka_cluster" "kafka" {
   gcp_config {
     access_config {
       network_configs {
-        subnet = google_compute_subnetwork.subnet.id
+        subnet = module.network.subnetwork_id
       }
     }
   }

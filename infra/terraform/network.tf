@@ -1,35 +1,30 @@
-resource "google_compute_network" "vpc" {
-  name                    = "wiki-vpc"
-  auto_create_subnetworks = false
+module "network" {
+  source = "./modules/network"
+
+  region          = var.region
+  network_name    = "wiki-vpc"
+  subnetwork_name = "wiki-subnet"
+  subnetwork_cidr = "10.10.0.0/16"
+  router_name     = "wiki-router"
+  cloud_nat_name  = "wiki-nat"
 }
 
-resource "google_compute_subnetwork" "subnet" {
-  name          = "wiki-subnet"
-  region        = var.region
-  network       = google_compute_network.vpc.id
-  ip_cidr_range = "10.10.0.0/16"
+moved {
+  from = google_compute_network.vpc
+  to   = module.network.google_compute_network.vpc
 }
 
-resource "google_compute_router" "router" {
-  name    = "wiki-router"
-  region  = var.region
-  network = google_compute_network.vpc.id
+moved {
+  from = google_compute_subnetwork.subnet
+  to   = module.network.google_compute_subnetwork.subnet
 }
 
-resource "google_compute_router_nat" "nat" {
-  name                               = "wiki-nat"
-  router                             = google_compute_router.router.name
-  region                             = var.region
-  nat_ip_allocate_option             = "AUTO_ONLY"
-  source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+moved {
+  from = google_compute_router.router
+  to   = module.network.google_compute_router.router
+}
 
-  subnetwork {
-    name                    = google_compute_subnetwork.subnet.id
-    source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
-  }
-
-  log_config {
-    enable = true
-    filter = "ERRORS_ONLY"
-  }
+moved {
+  from = google_compute_router_nat.nat
+  to   = module.network.google_compute_router_nat.nat
 }
