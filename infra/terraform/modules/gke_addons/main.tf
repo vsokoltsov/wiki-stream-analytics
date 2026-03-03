@@ -74,6 +74,24 @@ resource "kubectl_manifest" "secrets_store_gcp_provider" {
   depends_on = [helm_release.secrets_store_csi]
 }
 
+resource "google_compute_address" "flink_ip" {
+  name    = "wikistream-flink-ip"
+  region  = var.region
+  project = var.project_id
+}
+
+resource "google_compute_firewall" "allow_lb" {
+  name    = "allow-external-http"
+  network = "default"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+}
+
 resource "kubernetes_cluster_role_binding_v1" "gha_cluster_admin" {
   metadata {
     name = "gha-ci-cluster-admin"

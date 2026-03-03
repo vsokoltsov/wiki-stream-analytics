@@ -13,3 +13,11 @@ variable "cert_manager_version" {
 variable "flink_operator_version" {
   type = string
 }
+
+variable "project_id" {
+  type = string
+}
+
+variable "region" {
+  type = string
+}

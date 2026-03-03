@@ -31,7 +31,7 @@ output "pubsub_subscription" {
 }
 
 output "flink_public_ip" {
-  value = google_compute_address.flink_ip.address
+  value = module.gke_addons.flink_public_ip
 }
 
 output "bq_dataset" {

@@ -8,23 +8,3 @@ module "network" {
   router_name     = "wiki-router"
   cloud_nat_name  = "wiki-nat"
 }
-
-moved {
-  from = google_compute_network.vpc
-  to   = module.network.google_compute_network.vpc
-}
-
-moved {
-  from = google_compute_subnetwork.subnet
-  to   = module.network.google_compute_subnetwork.subnet
-}
-
-moved {
-  from = google_compute_router.router
-  to   = module.network.google_compute_router.router
-}
-
-moved {
-  from = google_compute_router_nat.nat
-  to   = module.network.google_compute_router_nat.nat
-}
