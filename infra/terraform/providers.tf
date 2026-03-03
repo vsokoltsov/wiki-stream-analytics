@@ -41,23 +41,23 @@ provider "google-beta" {
 data "google_client_config" "default" {}
 
 provider "kubernetes" {
-  host                   = "https://${google_container_cluster.gke.endpoint}"
+  host                   = "https://${module.gke.cluster_endpoint}"
   token                  = data.google_client_config.default.access_token
-  cluster_ca_certificate = base64decode(google_container_cluster.gke.master_auth[0].cluster_ca_certificate)
+  cluster_ca_certificate = base64decode(module.gke.cluster_ca_certificate)
 }
 
 provider "kubectl" {
-  host                   = "https://${google_container_cluster.gke.endpoint}"
+  host                   = "https://${module.gke.cluster_endpoint}"
   token                  = data.google_client_config.default.access_token
-  cluster_ca_certificate = base64decode(google_container_cluster.gke.master_auth[0].cluster_ca_certificate)
+  cluster_ca_certificate = base64decode(module.gke.cluster_ca_certificate)
   load_config_file       = false
 }
 
 provider "helm" {
   kubernetes = {
-    host                   = "https://${google_container_cluster.gke.endpoint}"
+    host                   = "https://${module.gke.cluster_endpoint}"
     token                  = data.google_client_config.default.access_token
-    cluster_ca_certificate = base64decode(google_container_cluster.gke.master_auth[0].cluster_ca_certificate)
+    cluster_ca_certificate = base64decode(module.gke.cluster_ca_certificate)
     load_config_file       = false
   }
 }
