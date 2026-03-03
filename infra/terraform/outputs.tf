@@ -1,13 +1,13 @@
 output "workload_identity_provider" {
-  value = google_iam_workload_identity_pool_provider.github.name
+  value = module.ci_cd.workload_identity_provider
 }
 
 output "ci_service_account_email" {
-  value = google_service_account.ci.email
+  value = module.ci_cd.ci_service_account_email
 }
 
 output "cloudbuild_staging_bucket_name" {
-  value = google_storage_bucket.cloudbuild_staging.name
+  value = module.ci_cd.cloudbuild_staging_bucket_name
 }
 
 output "kafka_cluster_name" {

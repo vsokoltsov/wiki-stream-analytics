@@ -85,7 +85,7 @@ resource "kubernetes_cluster_role_binding_v1" "gha_cluster_admin" {
 
   subject {
     kind      = "User"
-    name      = google_service_account.ci.email
+    name      = module.ci_cd.ci_service_account_email
     api_group = "rbac.authorization.k8s.io"
   }
 }
