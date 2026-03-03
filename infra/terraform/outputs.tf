@@ -11,7 +11,7 @@ output "cloudbuild_staging_bucket_name" {
 }
 
 output "kafka_cluster_name" {
-  value = google_managed_kafka_cluster.kafka.name
+  value = module.streaming.kafka_cluster_name
 }
 
 output "region" {

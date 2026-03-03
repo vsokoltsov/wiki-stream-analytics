@@ -23,31 +23,6 @@ resource "google_project_iam_member" "gha_gke_developer" {
   member  = local.gha_ci_sa
 }
 
-resource "google_project_iam_member" "producer_kafka" {
-  project = var.project_id
-  role    = "roles/managedkafka.client"
-  member  = "serviceAccount:${google_service_account.producer_sa.email}"
-}
-
-
-resource "google_project_iam_member" "processing_kafka" {
-  project = var.project_id
-  role    = "roles/managedkafka.client"
-  member  = "serviceAccount:${google_service_account.processing_sa.email}"
-}
-
-resource "google_service_account_iam_member" "producer_wi" {
-  service_account_id = google_service_account.producer_sa.name
-  role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[wikistream/producer-sa]"
-}
-
-resource "google_service_account_iam_member" "processing_wi" {
-  service_account_id = google_service_account.processing_sa.name
-  role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[wikistream/processing-sa]"
-}
-
 resource "google_project_iam_member" "gke_nodes_log_writer" {
   project = var.project_id
   role    = "roles/logging.logWriter"
@@ -66,18 +41,6 @@ resource "google_project_iam_member" "gke_nodes_ar_reader" {
   member  = "serviceAccount:${google_service_account.gke_nodes.email}"
 }
 
-resource "google_project_iam_member" "producer_secret_accessor" {
-  project = var.project_id
-  role    = "roles/secretmanager.secretAccessor"
-  member  = "serviceAccount:${google_service_account.producer_sa.email}"
-}
-
-resource "google_project_iam_member" "processing_secret_accessor" {
-  project = var.project_id
-  role    = "roles/secretmanager.secretAccessor"
-  member  = "serviceAccount:${google_service_account.processing_sa.email}"
-}
-
 data "google_storage_project_service_account" "gcs" {
   project    = var.project_id
   depends_on = [module.bootstrap]
@@ -94,5 +57,5 @@ resource "google_pubsub_topic_iam_member" "allow_gcs_publish" {
 resource "google_storage_bucket_iam_member" "processing_gcs_object_admin" {
   bucket = google_storage_bucket.datalake.name
   role   = "roles/storage.objectAdmin"
-  member = "serviceAccount:${google_service_account.processing_sa.email}"
+  member = "serviceAccount:${module.streaming.processing_service_account_email}"
 }
