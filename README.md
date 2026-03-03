@@ -1,5 +1,7 @@
 # Wikimedia Stream Analytics
 
+![logo](./docs/cover.png)
+
 ## 🎯 Objective
 
 The objective of this project is to design and implement a production-grade, cloud-native real-time data streaming platform that ingests Wikimedia’s public event stream, processes it using distributed stream processing frameworks, and delivers reliable, structured, and analytics-ready datasets to a cloud data warehouse.
