@@ -180,7 +180,7 @@ resource "google_project_iam_member" "processing_secret_accessor" {
 
 data "google_storage_project_service_account" "gcs" {
   project    = var.project_id
-  depends_on = [google_project_service.storage]
+  depends_on = [module.bootstrap]
 }
 
 resource "google_pubsub_topic_iam_member" "allow_gcs_publish" {
@@ -188,7 +188,7 @@ resource "google_pubsub_topic_iam_member" "allow_gcs_publish" {
   role   = "roles/pubsub.publisher"
   member = "serviceAccount:${data.google_storage_project_service_account.gcs.email_address}"
 
-  depends_on = [google_project_service.pubsub]
+  depends_on = [module.bootstrap]
 }
 
 resource "google_storage_bucket_iam_member" "processing_gcs_object_admin" {

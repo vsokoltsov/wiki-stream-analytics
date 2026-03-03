@@ -28,7 +28,7 @@ resource "google_container_cluster" "gke" {
     enabled = true
   }
 
-  depends_on          = [google_project_service.gke]
+  depends_on          = [module.bootstrap]
   deletion_protection = false
 }
 

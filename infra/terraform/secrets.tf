@@ -11,14 +11,14 @@ resource "google_secret_manager_secret" "wiki_user_agent" {
     }
   }
 
-  depends_on = [google_project_service.secretmanager]
+  depends_on = [module.bootstrap]
 }
 
 resource "google_secret_manager_secret_version" "wiki_user_agent_v1" {
   secret      = google_secret_manager_secret.wiki_user_agent.id
   secret_data = "wiki-stream-analytics/0.1 (https://github.com/your/repo; contact: you@domain)"
 
-  depends_on = [google_project_service.secretmanager]
+  depends_on = [module.bootstrap]
 }
 
 resource "google_secret_manager_secret" "kafka_bootstrap" {
@@ -42,7 +42,7 @@ resource "google_secret_manager_secret_version" "kafka_bootstrap_v1" {
 
   depends_on = [
     google_managed_kafka_cluster.kafka,
-    google_project_service.secretmanager
+    module.bootstrap
   ]
 }
 
@@ -51,7 +51,7 @@ resource "google_secret_manager_secret_version" "kafka_bootstrap_mtls_v1" {
   secret_data = local.kafka_bootstrap_mtls
   depends_on = [
     google_managed_kafka_cluster.kafka,
-    google_project_service.secretmanager
+    module.bootstrap
   ]
 }
 
@@ -61,7 +61,7 @@ resource "google_secret_manager_secret" "kafka_sasl_username" {
     auto {}
   }
 
-  depends_on = [google_project_service.secretmanager]
+  depends_on = [module.bootstrap]
 }
 
 resource "google_secret_manager_secret_version" "kafka_sasl_username_v1" {
@@ -70,7 +70,7 @@ resource "google_secret_manager_secret_version" "kafka_sasl_username_v1" {
 
   depends_on = [
     google_service_account.producer_sa,
-    google_project_service.secretmanager
+    module.bootstrap
   ]
 }
 
@@ -80,7 +80,7 @@ resource "google_secret_manager_secret" "kafka_sasl_username_processing" {
     auto {}
   }
 
-  depends_on = [google_project_service.secretmanager]
+  depends_on = [module.bootstrap]
 }
 
 resource "google_secret_manager_secret_version" "kafka_sasl_username_processing_v1" {
@@ -89,7 +89,7 @@ resource "google_secret_manager_secret_version" "kafka_sasl_username_processing_
 
   depends_on = [
     google_service_account.processing_sa,
-    google_project_service.secretmanager
+    module.bootstrap
   ]
 }
 
@@ -99,7 +99,7 @@ resource "google_secret_manager_secret" "gcs_bucket" {
     auto {}
   }
 
-  depends_on = [google_project_service.secretmanager]
+  depends_on = [module.bootstrap]
 }
 
 resource "google_secret_manager_secret_version" "gcs_bucket_v1" {
@@ -108,6 +108,6 @@ resource "google_secret_manager_secret_version" "gcs_bucket_v1" {
 
   depends_on = [
     google_service_account.processing_sa,
-    google_project_service.secretmanager
+    module.bootstrap
   ]
 }
