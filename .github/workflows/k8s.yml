@@ -1,0 +1,99 @@
+name: Kubernetes Config
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "infra/k8s/**"
+      - ".github/workflows/k8s.yml"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "infra/k8s/**"
+      - ".github/workflows/k8s.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: k8s-config-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify charts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Discover charts
+        id: charts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t charts < <(find infra/k8s/charts -mindepth 1 -maxdepth 1 -type d | sort)
+
+          if [ "${#charts[@]}" -eq 0 ]; then
+            echo "No charts found under infra/k8s/charts"
+            exit 1
+          fi
+
+          printf 'Discovered charts:\n%s\n' "${charts[@]}"
+          {
+            echo "charts<<EOF"
+            printf '%s\n' "${charts[@]}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Helm dependency build
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r chart; do
+            [ -n "$chart" ] || continue
+            echo "Building dependencies for ${chart}"
+            helm dependency build "$chart"
+          done <<< "${{ steps.charts.outputs.charts }}"
+
+      - name: Helm lint
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r chart; do
+            [ -n "$chart" ] || continue
+            echo "Linting ${chart}"
+            helm lint "$chart"
+          done <<< "${{ steps.charts.outputs.charts }}"
+
+      - name: Helm template validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/helm-renders
+
+          while IFS= read -r chart; do
+            [ -n "$chart" ] || continue
+            chart_name="$(basename "$chart")"
+            values_file="$chart/values.yaml"
+            output_file="/tmp/helm-renders/${chart_name}.yaml"
+
+            echo "Rendering ${chart}"
+
+            if [ -f "$values_file" ]; then
+              helm template "$chart_name" "$chart" -f "$values_file" > "$output_file"
+            else
+              helm template "$chart_name" "$chart" > "$output_file"
+            fi
+
+            test -s "$output_file"
+          done <<< "${{ steps.charts.outputs.charts }}"
