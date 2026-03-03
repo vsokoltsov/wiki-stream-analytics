@@ -40,7 +40,7 @@ run "ci_cd_state_matches_current_stack" {
         "google_storage_bucket_iam_member.gha_ci_object_admin",
         "google_storage_bucket_iam_member.gha_staging_object_admin",
       ])
-    ) || (
+      ) || (
       toset(output.module_resources["module.ci_cd"]) == toset([
         "google_artifact_registry_repository.repo",
         "google_iam_workload_identity_pool.github",
