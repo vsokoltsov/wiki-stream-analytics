@@ -40,22 +40,3 @@ resource "google_project_iam_member" "gke_nodes_ar_reader" {
   role    = "roles/artifactregistry.reader"
   member  = "serviceAccount:${google_service_account.gke_nodes.email}"
 }
-
-data "google_storage_project_service_account" "gcs" {
-  project    = var.project_id
-  depends_on = [module.bootstrap]
-}
-
-resource "google_pubsub_topic_iam_member" "allow_gcs_publish" {
-  topic  = google_pubsub_topic.datalake_objects.name
-  role   = "roles/pubsub.publisher"
-  member = "serviceAccount:${data.google_storage_project_service_account.gcs.email_address}"
-
-  depends_on = [module.bootstrap]
-}
-
-resource "google_storage_bucket_iam_member" "processing_gcs_object_admin" {
-  bucket = google_storage_bucket.datalake.name
-  role   = "roles/storage.objectAdmin"
-  member = "serviceAccount:${module.streaming.processing_service_account_email}"
-}

@@ -166,16 +166,3 @@ resource "google_secret_manager_secret_version" "kafka_sasl_username_processing_
   secret      = google_secret_manager_secret.kafka_sasl_username_processing.id
   secret_data = google_service_account.processing_sa.email
 }
-
-resource "google_secret_manager_secret" "gcs_bucket" {
-  secret_id = "gcs_bucket"
-
-  replication {
-    auto {}
-  }
-}
-
-resource "google_secret_manager_secret_version" "gcs_bucket_v1" {
-  secret      = google_secret_manager_secret.gcs_bucket.id
-  secret_data = var.datalake_bucket
-}

@@ -1,11 +1,10 @@
 module "streaming" {
   source = "./modules/streaming"
 
-  project_id      = var.project_id
-  region          = var.region
-  app_namespace   = kubernetes_namespace_v1.wikistream.metadata[0].name
-  subnetwork_id   = module.network.subnetwork_id
-  datalake_bucket = google_storage_bucket.datalake.name
+  project_id    = var.project_id
+  region        = var.region
+  app_namespace = kubernetes_namespace_v1.wikistream.metadata[0].name
+  subnetwork_id = module.network.subnetwork_id
 
   depends_on = [module.bootstrap]
 }
@@ -118,14 +117,4 @@ moved {
 moved {
   from = google_secret_manager_secret_version.kafka_sasl_username_processing_v1
   to   = module.streaming.google_secret_manager_secret_version.kafka_sasl_username_processing_v1
-}
-
-moved {
-  from = google_secret_manager_secret.gcs_bucket
-  to   = module.streaming.google_secret_manager_secret.gcs_bucket
-}
-
-moved {
-  from = google_secret_manager_secret_version.gcs_bucket_v1
-  to   = module.streaming.google_secret_manager_secret_version.gcs_bucket_v1
 }

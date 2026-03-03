@@ -19,15 +19,15 @@ output "region" {
 }
 
 output "bucket_name" {
-  value = google_storage_bucket.datalake.name
+  value = module.data_lake.bucket_name
 }
 
 output "pubsub_topic" {
-  value = google_pubsub_topic.datalake_objects.name
+  value = module.data_lake.pubsub_topic_name
 }
 
 output "pubsub_subscription" {
-  value = google_pubsub_subscription.datalake_objects_sub.name
+  value = module.data_lake.pubsub_subscription_name
 }
 
 output "flink_public_ip" {

@@ -13,7 +13,3 @@ variable "app_namespace" {
 variable "subnetwork_id" {
   type = string
 }
-
-variable "datalake_bucket" {
-  type = string
-}
