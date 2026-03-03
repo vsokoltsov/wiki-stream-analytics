@@ -42,6 +42,7 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -t charts < <(find infra/k8s/charts -mindepth 1 -maxdepth 1 -type d | sort)
+          app_charts=()
 
           if [ "${#charts[@]}" -eq 0 ]; then
             echo "No charts found under infra/k8s/charts"
@@ -49,9 +50,20 @@ jobs:
           fi
 
           printf 'Discovered charts:\n%s\n' "${charts[@]}"
+          for chart in "${charts[@]}"; do
+            if grep -Eq '^type:[[:space:]]*library$' "${chart}/Chart.yaml"; then
+              echo "Skipping library chart for install/render validation: ${chart}"
+              continue
+            fi
+            app_charts+=("${chart}")
+          done
+
           {
             echo "charts<<EOF"
             printf '%s\n' "${charts[@]}"
+            echo "EOF"
+            echo "app_charts<<EOF"
+            printf '%s\n' "${app_charts[@]}"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
@@ -73,7 +85,7 @@ jobs:
             [ -n "$chart" ] || continue
             echo "Linting ${chart}"
             helm lint "$chart"
-          done <<< "${{ steps.charts.outputs.charts }}"
+          done <<< "${{ steps.charts.outputs.app_charts }}"
 
       - name: Helm template validation
         shell: bash
@@ -96,4 +108,4 @@ jobs:
             fi
 
             test -s "$output_file"
-          done <<< "${{ steps.charts.outputs.charts }}"
+          done <<< "${{ steps.charts.outputs.app_charts }}"
