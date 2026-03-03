@@ -7,7 +7,7 @@ run "streaming_config_contract" {
 
   variables {
     files = {
-      main      = file("modules/streaming/main.tf")
+      module    = join("\n", [for f in sort(tolist(fileset("modules/streaming", "*.tf"))) : file("modules/streaming/${f}")])
       variables = file("modules/streaming/variables.tf")
       outputs   = file("modules/streaming/outputs.tf")
       root      = file("streaming.tf")
@@ -15,22 +15,22 @@ run "streaming_config_contract" {
   }
 
   assert {
-    condition     = length(regexall("cluster_id\\s*=\\s*\"wiki-kafka\"", output.files.main)) > 0
+    condition     = length(regexall("cluster_id\\s*=\\s*\"wiki-kafka\"", output.files.module)) > 0
     error_message = "streaming module should define the wiki-kafka cluster."
   }
 
   assert {
-    condition     = length(regexall("topic_id\\s*=\\s*\"recentchange_raw\"", output.files.main)) > 0
+    condition     = length(regexall("topic_id\\s*=\\s*\"recentchange_raw\"", output.files.module)) > 0
     error_message = "streaming module should define the recentchange_raw topic."
   }
 
   assert {
-    condition     = length(regexall("namespace\\s*=\\s*var\\.app_namespace", output.files.main)) > 0
+    condition     = length(regexall("namespace\\s*=\\s*var\\.app_namespace", output.files.module)) > 0
     error_message = "streaming Kubernetes service accounts should use the app_namespace variable."
   }
 
   assert {
-    condition     = length(regexall("secret_id\\s*=\\s*\"kafka_bootstrap_servers\"", output.files.main)) > 0
+    condition     = length(regexall("secret_id\\s*=\\s*\"kafka_bootstrap_servers\"", output.files.module)) > 0
     error_message = "streaming module should define the kafka bootstrap secret."
   }
 

@@ -7,7 +7,7 @@ run "gke_addons_config_contract" {
 
   variables {
     files = {
-      main      = file("modules/gke_addons/main.tf")
+      module    = join("\n", [for f in sort(tolist(fileset("modules/gke_addons", "*.tf"))) : file("modules/gke_addons/${f}")])
       variables = file("modules/gke_addons/variables.tf")
       outputs   = file("modules/gke_addons/outputs.tf")
       versions  = file("modules/gke_addons/versions.tf")
@@ -16,22 +16,22 @@ run "gke_addons_config_contract" {
   }
 
   assert {
-    condition     = length(regexall("resource\\s+\"kubernetes_namespace_v1\"\\s+\"wikistream\"", output.files.main)) > 0
+    condition     = length(regexall("resource\\s+\"kubernetes_namespace_v1\"\\s+\"wikistream\"", output.files.module)) > 0
     error_message = "gke_addons should define the wikistream namespace."
   }
 
   assert {
-    condition     = length(regexall("version\\s*=\\s*var\\.cert_manager_version", output.files.main)) > 0
+    condition     = length(regexall("version\\s*=\\s*var\\.cert_manager_version", output.files.module)) > 0
     error_message = "gke_addons should wire cert-manager version from a variable."
   }
 
   assert {
-    condition     = length(regexall("value\\s*=\\s*\"\\{\\$\\{var\\.app_namespace\\}\\}\"", output.files.main)) > 0
+    condition     = length(regexall("value\\s*=\\s*\"\\{\\$\\{var\\.app_namespace\\}\\}\"", output.files.module)) > 0
     error_message = "gke_addons should configure the Flink operator to watch app_namespace."
   }
 
   assert {
-    condition     = length(regexall("name\\s*=\\s*\"wikistream-flink-ip\"", output.files.main)) > 0
+    condition     = length(regexall("name\\s*=\\s*\"wikistream-flink-ip\"", output.files.module)) > 0
     error_message = "gke_addons should define the Flink public IP resource."
   }
 

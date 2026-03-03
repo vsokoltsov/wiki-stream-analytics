@@ -22,6 +22,10 @@ output "bucket_name" {
   value = module.data_lake.bucket_name
 }
 
+output "flink_state_bucket_name" {
+  value = module.data_lake.flink_state_bucket_name
+}
+
 output "pubsub_topic" {
   value = module.data_lake.pubsub_topic_name
 }

@@ -7,7 +7,7 @@ run "gke_config_contract" {
 
   variables {
     files = {
-      main      = file("modules/gke/main.tf")
+      module    = join("\n", [for f in sort(tolist(fileset("modules/gke", "*.tf"))) : file("modules/gke/${f}")])
       variables = file("modules/gke/variables.tf")
       outputs   = file("modules/gke/outputs.tf")
       providers = file("providers.tf")
@@ -15,22 +15,22 @@ run "gke_config_contract" {
   }
 
   assert {
-    condition     = length(regexall("name\\s*=\\s*\"wiki-gke\"", output.files.main)) > 0
+    condition     = length(regexall("name\\s*=\\s*\"wiki-gke\"", output.files.module)) > 0
     error_message = "gke module should define the wiki-gke cluster."
   }
 
   assert {
-    condition     = length(regexall("enable_private_nodes\\s*=\\s*true", output.files.main)) > 0
+    condition     = length(regexall("enable_private_nodes\\s*=\\s*true", output.files.module)) > 0
     error_message = "gke module should keep private nodes enabled."
   }
 
   assert {
-    condition     = length(regexall("workload_pool\\s*=\\s*\"\\$\\{var\\.project_id\\}\\.svc\\.id\\.goog\"", output.files.main)) > 0
+    condition     = length(regexall("workload_pool\\s*=\\s*\"\\$\\{var\\.project_id\\}\\.svc\\.id\\.goog\"", output.files.module)) > 0
     error_message = "gke module should derive workload identity pool from project_id."
   }
 
   assert {
-    condition     = length(regexall("machine_type\\s*=\\s*\"e2-medium\"", output.files.main)) > 0
+    condition     = length(regexall("machine_type\\s*=\\s*\"e2-medium\"", output.files.module)) > 0
     error_message = "gke node pool machine type drifted."
   }
 

@@ -7,19 +7,19 @@ run "bootstrap_config_contract" {
 
   variables {
     files = {
-      main      = file("modules/bootstrap/main.tf")
+      module    = join("\n", [for f in sort(tolist(fileset("modules/bootstrap", "*.tf"))) : file("modules/bootstrap/${f}")])
       variables = file("modules/bootstrap/variables.tf")
       root      = file("bootstrap.tf")
     }
   }
 
   assert {
-    condition     = length(regexall("resource\\s+\"google_project_service\"\\s+\"gke\"", output.files.main)) > 0
+    condition     = length(regexall("resource\\s+\"google_project_service\"\\s+\"gke\"", output.files.module)) > 0
     error_message = "bootstrap module should enable the GKE API."
   }
 
   assert {
-    condition     = length(regexall("service\\s*=\\s*\"managedkafka.googleapis.com\"", output.files.main)) > 0
+    condition     = length(regexall("service\\s*=\\s*\"managedkafka.googleapis.com\"", output.files.module)) > 0
     error_message = "bootstrap module should enable the Managed Kafka API."
   }
 

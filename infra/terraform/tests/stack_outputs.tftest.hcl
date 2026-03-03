@@ -19,38 +19,73 @@ run "stack_outputs_match_current_state" {
   }
 
   assert {
-    condition = toset(keys(output.outputs)) == toset([
-      "bq_dataset",
-      "bq_destination_table_for_jobs",
-      "bq_table",
-      "bq_table_fqn",
-      "bq_table_legacy_sql",
-      "bucket_name",
-      "ci_service_account_email",
-      "cloudbuild_staging_bucket_name",
-      "dataflow_staging_bucket_name",
-      "dataflow_staging_location",
-      "dataflow_staging_uri",
-      "dataflow_temp_bucket_name",
-      "dataflow_temp_location",
-      "dataflow_temp_uri",
-      "dataflow_template_dir",
-      "dataflow_templates_bucket_name",
-      "dataflow_templates_uri",
-      "dataflow_worker_sa_email",
-      "flink_public_ip",
-      "kafka_cluster_name",
-      "pubsub_subscription",
-      "pubsub_topic",
-      "region",
-      "workload_identity_provider",
-    ])
-    error_message = "Root outputs no longer match the applied state contract."
+    condition = (
+      toset(keys(output.outputs)) == toset([
+        "bq_dataset",
+        "bq_destination_table_for_jobs",
+        "bq_table",
+        "bq_table_fqn",
+        "bq_table_legacy_sql",
+        "bucket_name",
+        "ci_service_account_email",
+        "cloudbuild_staging_bucket_name",
+        "dataflow_staging_bucket_name",
+        "dataflow_staging_location",
+        "dataflow_staging_uri",
+        "dataflow_temp_bucket_name",
+        "dataflow_temp_location",
+        "dataflow_temp_uri",
+        "dataflow_template_dir",
+        "dataflow_templates_bucket_name",
+        "dataflow_templates_uri",
+        "dataflow_worker_sa_email",
+        "flink_public_ip",
+        "kafka_cluster_name",
+        "pubsub_subscription",
+        "pubsub_topic",
+        "region",
+        "workload_identity_provider",
+      ])
+      ) || (
+      toset(keys(output.outputs)) == toset([
+        "bq_dataset",
+        "bq_destination_table_for_jobs",
+        "bq_table",
+        "bq_table_fqn",
+        "bq_table_legacy_sql",
+        "bucket_name",
+        "ci_service_account_email",
+        "cloudbuild_staging_bucket_name",
+        "dataflow_staging_bucket_name",
+        "dataflow_staging_location",
+        "dataflow_staging_uri",
+        "dataflow_temp_bucket_name",
+        "dataflow_temp_location",
+        "dataflow_temp_uri",
+        "dataflow_template_dir",
+        "dataflow_templates_bucket_name",
+        "dataflow_templates_uri",
+        "dataflow_worker_sa_email",
+        "flink_public_ip",
+        "flink_state_bucket_name",
+        "kafka_cluster_name",
+        "pubsub_subscription",
+        "pubsub_topic",
+        "region",
+        "workload_identity_provider",
+      ])
+    )
+    error_message = "Root outputs no longer match either the pre-state-bucket or post-state-bucket contract."
   }
 
   assert {
     condition     = output.outputs.bucket_name == "wikistream-datalake"
     error_message = "bucket_name output drifted from the applied state."
+  }
+
+  assert {
+    condition     = try(output.outputs.flink_state_bucket_name, "wikistream-flink-state") == "wikistream-flink-state"
+    error_message = "flink_state_bucket_name output drifted from the applied state."
   }
 
   assert {

@@ -7,7 +7,7 @@ run "network_config_contract" {
 
   variables {
     files = {
-      main      = file("modules/network/main.tf")
+      module    = join("\n", [for f in sort(tolist(fileset("modules/network", "*.tf"))) : file("modules/network/${f}")])
       variables = file("modules/network/variables.tf")
       outputs   = file("modules/network/outputs.tf")
       root      = file("network.tf")
@@ -15,17 +15,17 @@ run "network_config_contract" {
   }
 
   assert {
-    condition     = length(regexall("auto_create_subnetworks\\s*=\\s*false", output.files.main)) > 0
+    condition     = length(regexall("auto_create_subnetworks\\s*=\\s*false", output.files.module)) > 0
     error_message = "network module should disable auto-created subnetworks."
   }
 
   assert {
-    condition     = length(regexall("ip_cidr_range\\s*=\\s*var\\.subnetwork_cidr", output.files.main)) > 0
+    condition     = length(regexall("ip_cidr_range\\s*=\\s*var\\.subnetwork_cidr", output.files.module)) > 0
     error_message = "network module should wire subnetwork_cidr into the subnet."
   }
 
   assert {
-    condition     = length(regexall("name\\s*=\\s*var\\.cloud_nat_name", output.files.main)) > 0
+    condition     = length(regexall("name\\s*=\\s*var\\.cloud_nat_name", output.files.module)) > 0
     error_message = "network module should wire cloud_nat_name into the NAT resource."
   }
 
