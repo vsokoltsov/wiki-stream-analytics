@@ -15,7 +15,7 @@ run "gke_state_matches_current_stack" {
   }
 
   variables {
-    state_json = file("terraform.tfstate")
+    state_json = trimspace(file("terraform.tfstate")) != "" ? file("terraform.tfstate") : file("terraform.tfstate.backup")
   }
 
   assert {

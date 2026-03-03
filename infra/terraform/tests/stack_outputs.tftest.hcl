@@ -15,7 +15,7 @@ run "stack_outputs_match_current_state" {
   }
 
   variables {
-    state_json = file("terraform.tfstate")
+    state_json = trimspace(file("terraform.tfstate")) != "" ? file("terraform.tfstate") : file("terraform.tfstate.backup")
   }
 
   assert {
