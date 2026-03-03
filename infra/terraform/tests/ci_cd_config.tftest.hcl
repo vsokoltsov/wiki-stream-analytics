@@ -30,6 +30,26 @@ run "ci_cd_config_contract" {
   }
 
   assert {
+    condition     = length(regexall("role\\s*=\\s*\"roles/viewer\"", output.files.main)) > 0
+    error_message = "ci_cd module should grant the CI service account project viewer access for Terraform refresh."
+  }
+
+  assert {
+    condition     = length(regexall("role\\s*=\\s*\"roles/iam\\.securityReviewer\"", output.files.main)) > 0
+    error_message = "ci_cd module should grant the CI service account IAM policy read access."
+  }
+
+  assert {
+    condition     = length(regexall("role\\s*=\\s*\"roles/storage\\.admin\"", output.files.main)) > 0
+    error_message = "ci_cd module should grant the CI service account bucket IAM read access."
+  }
+
+  assert {
+    condition     = length(regexall("role\\s*=\\s*\"roles/managedkafka\\.viewer\"", output.files.main)) > 0
+    error_message = "ci_cd module should grant the CI service account Managed Kafka read access for Terraform refresh."
+  }
+
+  assert {
     condition     = length(regexall("output\\s+\"ci_service_account_email\"", output.files.outputs)) > 0
     error_message = "ci_cd module should export ci_service_account_email."
   }

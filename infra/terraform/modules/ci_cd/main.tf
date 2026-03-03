@@ -85,6 +85,54 @@ resource "google_project_iam_member" "gha_cloudbuild_editor" {
   member  = local.gha_ci_sa
 }
 
+resource "google_project_iam_member" "gha_viewer" {
+  project = var.project_id
+  role    = "roles/viewer"
+  member  = local.gha_ci_sa
+}
+
+resource "google_project_iam_member" "gha_iam_security_reviewer" {
+  project = var.project_id
+  role    = "roles/iam.securityReviewer"
+  member  = local.gha_ci_sa
+}
+
+resource "google_project_iam_member" "gha_service_account_viewer" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountViewer"
+  member  = local.gha_ci_sa
+}
+
+resource "google_project_iam_member" "gha_workload_identity_pool_viewer" {
+  project = var.project_id
+  role    = "roles/iam.workloadIdentityPoolViewer"
+  member  = local.gha_ci_sa
+}
+
+resource "google_project_iam_member" "gha_managedkafka_viewer" {
+  project = var.project_id
+  role    = "roles/managedkafka.viewer"
+  member  = local.gha_ci_sa
+}
+
+resource "google_project_iam_member" "gha_secretmanager_viewer" {
+  project = var.project_id
+  role    = "roles/secretmanager.viewer"
+  member  = local.gha_ci_sa
+}
+
+resource "google_project_iam_member" "gha_pubsub_viewer" {
+  project = var.project_id
+  role    = "roles/pubsub.viewer"
+  member  = local.gha_ci_sa
+}
+
+resource "google_project_iam_member" "gha_storage_admin" {
+  project = var.project_id
+  role    = "roles/storage.admin"
+  member  = local.gha_ci_sa
+}
+
 resource "google_storage_bucket_iam_member" "gha_staging_object_admin" {
   bucket = google_storage_bucket.cloudbuild_staging.name
   role   = "roles/storage.objectAdmin"

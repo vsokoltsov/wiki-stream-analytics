@@ -23,11 +23,47 @@ gcloud storage buckets update gs://<TFSTATE_BUCKET> --versioning
 
 ```bash
 gcloud storage buckets add-iam-policy-binding gs://<TFSTATE_BUCKET> \
-  --member="serviceAccount:<CI_SA_EMAIL>" \
+ --member="serviceAccount:<CI_SA_EMAIL>" \
   --role="roles/storage.objectAdmin"
 ```
 
-4. Migrate the current local state into the remote backend.
+4. Bootstrap the GitHub Actions service account with the read permissions Terraform needs for `plan`.
+
+```bash
+gcloud projects add-iam-policy-binding <GCP_PROJECT_ID> \
+  --member="serviceAccount:<CI_SA_EMAIL>" \
+  --role="roles/viewer"
+
+gcloud projects add-iam-policy-binding <GCP_PROJECT_ID> \
+  --member="serviceAccount:<CI_SA_EMAIL>" \
+  --role="roles/iam.securityReviewer"
+
+gcloud projects add-iam-policy-binding <GCP_PROJECT_ID> \
+  --member="serviceAccount:<CI_SA_EMAIL>" \
+  --role="roles/iam.serviceAccountViewer"
+
+gcloud projects add-iam-policy-binding <GCP_PROJECT_ID> \
+  --member="serviceAccount:<CI_SA_EMAIL>" \
+  --role="roles/iam.workloadIdentityPoolViewer"
+
+gcloud projects add-iam-policy-binding <GCP_PROJECT_ID> \
+  --member="serviceAccount:<CI_SA_EMAIL>" \
+  --role="roles/managedkafka.viewer"
+
+gcloud projects add-iam-policy-binding <GCP_PROJECT_ID> \
+  --member="serviceAccount:<CI_SA_EMAIL>" \
+  --role="roles/pubsub.viewer"
+
+gcloud projects add-iam-policy-binding <GCP_PROJECT_ID> \
+  --member="serviceAccount:<CI_SA_EMAIL>" \
+  --role="roles/secretmanager.viewer"
+
+gcloud projects add-iam-policy-binding <GCP_PROJECT_ID> \
+  --member="serviceAccount:<CI_SA_EMAIL>" \
+  --role="roles/storage.admin"
+```
+
+5. Migrate the current local state into the remote backend.
 
 ```bash
 terraform -chdir=infra/terraform init -migrate-state \
@@ -53,9 +89,10 @@ terraform -chdir=infra/terraform init -migrate-state \
 
 - Runs only when files under `infra/terraform/**` change
 - Runs `terraform init`, `terraform fmt -check`, `terraform validate`, `terraform test`, and `terraform plan`
-- Applies automatically only on `push` to `main`
+- Fails if `terraform plan` reports any changes
 
 ### Notes
 
 - The native Terraform tests pull remote state into a local `terraform.tfstate` file before `terraform test`.
 - The backend bucket must be created outside this stack. Do not try to manage the backend bucket from the same Terraform root that uses it as its backend.
+- The CI service account must be bootstrapped once outside GitHub Actions, because the workflow is verification-only and cannot grant its own missing IAM permissions.
