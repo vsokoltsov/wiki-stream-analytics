@@ -195,6 +195,10 @@ If usage patterns evolve (e.g., BI dashboards with heavy repeated queries), mart
 
 #### Infrastructure
 
+> ⚠️ Note: fopr more detailed explanation, it is recommended to follow the guides from the specific infrastructure modules:
+> * [Terraform](./infra/terraform/README.md)
+> * [Helm](./infra/k8s/README.md)
+
 1. Populate infra/terraform/terraform.tfvars from template `cp infra/terraform/terraform.tfvars.sample infra/terraform/terraform.tfvars` and fill the necessary data
 2. Copy GCP service account file to the root folder
 3. Run `gcloud auth application-default login` and authenticate
