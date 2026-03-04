@@ -2,6 +2,22 @@
 
 ![logo](./docs/cover.png)
 
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![Apache Beam](https://img.shields.io/badge/Apache%20Beam-2.61.0-FC4C02?logo=apache&logoColor=white)
+![Apache Flink](https://img.shields.io/badge/Apache%20Flink-2.0.1-E6526F?logo=apacheflink&logoColor=white)
+![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-Managed-231F20?logo=apachekafka&logoColor=white)
+![Google Cloud](https://img.shields.io/badge/Google%20Cloud-Platform-4285F4?logo=googlecloud&logoColor=white)
+![GKE](https://img.shields.io/badge/GKE-Kubernetes-4285F4?logo=kubernetes&logoColor=white)
+![BigQuery](https://img.shields.io/badge/BigQuery-Warehouse-669DF6?logo=googlebigquery&logoColor=white)
+![Dataflow](https://img.shields.io/badge/Dataflow-Streaming-1A73E8?logo=googlecloud&logoColor=white)
+![Pub/Sub](https://img.shields.io/badge/Pub%2FSub-Events-34A853?logo=googlecloud&logoColor=white)
+![Cloud Storage](https://img.shields.io/badge/Cloud%20Storage-GCS-AECBFA?logo=googlecloud&logoColor=black)
+![Terraform](https://img.shields.io/badge/Terraform-IaC-844FBA?logo=terraform&logoColor=white)
+![Helm](https://img.shields.io/badge/Helm-Charts-0F1689?logo=helm&logoColor=white)
+![dbt](https://img.shields.io/badge/dbt-Analytics-FF694B?logo=dbt&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Containers-2496ED?logo=docker&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI%2FCD-2088FF?logo=githubactions&logoColor=white)
+
 ## 🎯 Objective
 
 The objective of this project is to design and implement a production-grade, cloud-native real-time data streaming platform that ingests Wikimedia’s public event stream, processes it using distributed stream processing frameworks, and delivers reliable, structured, and analytics-ready datasets to a cloud data warehouse.
