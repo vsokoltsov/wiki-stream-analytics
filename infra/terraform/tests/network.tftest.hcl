@@ -19,13 +19,24 @@ run "network_state_matches_current_stack" {
   }
 
   assert {
-    condition = toset(output.module_resources["module.network"]) == toset([
-      "google_compute_network.vpc",
-      "google_compute_router.router",
-      "google_compute_router_nat.nat",
-      "google_compute_subnetwork.subnet",
-    ])
-    error_message = "network module resources no longer match the applied state."
+    # Allow both states:
+    # - active: router NAT exists
+    # - destroyed: NAT intentionally removed to reduce baseline cost
+    condition = (
+      try(toset(output.module_resources["module.network"]), toset([])) == toset([
+        "google_compute_network.vpc",
+        "google_compute_router.router",
+        "google_compute_router_nat.nat",
+        "google_compute_subnetwork.subnet",
+      ])
+      ) || (
+      try(toset(output.module_resources["module.network"]), toset([])) == toset([
+        "google_compute_network.vpc",
+        "google_compute_router.router",
+        "google_compute_subnetwork.subnet",
+      ])
+    )
+    error_message = "network module resources no longer match either the active or intentionally destroyed state."
   }
 
   assert {
@@ -49,7 +60,11 @@ run "network_state_matches_current_stack" {
   }
 
   assert {
-    condition     = output.module_resource_attributes["module.network"]["google_compute_router_nat.nat"].name == "wiki-nat"
-    error_message = "network Cloud NAT name drifted."
+    condition = (
+      try(output.module_resource_attributes["module.network"]["google_compute_router_nat.nat"].name, "destroyed") == "wiki-nat"
+      ) || (
+      try(output.module_resource_attributes["module.network"]["google_compute_router_nat.nat"].name, "destroyed") == "destroyed"
+    )
+    error_message = "network Cloud NAT name drifted when NAT exists."
   }
 }

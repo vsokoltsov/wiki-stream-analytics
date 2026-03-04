@@ -19,59 +19,53 @@ run "streaming_state_matches_current_stack" {
   }
 
   assert {
-    # Allow both states:
-    # - active: managed Kafka cluster/topic exist
-    # - destroyed: costly managed Kafka resources intentionally removed
+    # Allow active + multiple intentionally destroyed variants.
+    # We require core identities/secrets and allow Kafka/Kubernetes pieces to be absent.
     condition = (
-      try(toset(output.module_resources["module.streaming"]), toset([])) == toset([
-        "google_managed_kafka_cluster.kafka",
-        "google_managed_kafka_topic.recentchange_raw",
-        "google_project_iam_member.processing_kafka",
-        "google_project_iam_member.processing_secret_accessor",
-        "google_project_iam_member.producer_kafka",
-        "google_project_iam_member.producer_secret_accessor",
-        "google_secret_manager_secret.kafka_bootstrap",
-        "google_secret_manager_secret.kafka_bootstrap_mtls",
-        "google_secret_manager_secret.kafka_sasl_username",
-        "google_secret_manager_secret.kafka_sasl_username_processing",
-        "google_secret_manager_secret.wiki_user_agent",
-        "google_secret_manager_secret_version.kafka_bootstrap_mtls_v1",
-        "google_secret_manager_secret_version.kafka_bootstrap_v1",
-        "google_secret_manager_secret_version.kafka_sasl_username_processing_v1",
-        "google_secret_manager_secret_version.kafka_sasl_username_v1",
-        "google_secret_manager_secret_version.wiki_user_agent_v1",
-        "google_service_account.processing_sa",
-        "google_service_account.producer_sa",
-        "google_service_account_iam_member.processing_wi",
-        "google_service_account_iam_member.producer_wi",
-        "kubernetes_service_account_v1.processing",
-        "kubernetes_service_account_v1.producer",
+      alltrue([
+        for r in [
+          "google_project_iam_member.processing_kafka",
+          "google_project_iam_member.processing_secret_accessor",
+          "google_project_iam_member.producer_kafka",
+          "google_project_iam_member.producer_secret_accessor",
+          "google_secret_manager_secret.kafka_bootstrap",
+          "google_secret_manager_secret.kafka_bootstrap_mtls",
+          "google_secret_manager_secret.kafka_sasl_username",
+          "google_secret_manager_secret.kafka_sasl_username_processing",
+          "google_secret_manager_secret.wiki_user_agent",
+          "google_service_account.processing_sa",
+          "google_service_account.producer_sa",
+        ] : contains(try(output.module_resources["module.streaming"], []), r)
       ])
-      ) || (
-      try(toset(output.module_resources["module.streaming"]), toset([])) == toset([
-        "google_project_iam_member.processing_kafka",
-        "google_project_iam_member.processing_secret_accessor",
-        "google_project_iam_member.producer_kafka",
-        "google_project_iam_member.producer_secret_accessor",
-        "google_secret_manager_secret.kafka_bootstrap",
-        "google_secret_manager_secret.kafka_bootstrap_mtls",
-        "google_secret_manager_secret.kafka_sasl_username",
-        "google_secret_manager_secret.kafka_sasl_username_processing",
-        "google_secret_manager_secret.wiki_user_agent",
-        "google_secret_manager_secret_version.kafka_bootstrap_mtls_v1",
-        "google_secret_manager_secret_version.kafka_bootstrap_v1",
-        "google_secret_manager_secret_version.kafka_sasl_username_processing_v1",
-        "google_secret_manager_secret_version.kafka_sasl_username_v1",
-        "google_secret_manager_secret_version.wiki_user_agent_v1",
-        "google_service_account.processing_sa",
-        "google_service_account.producer_sa",
-        "google_service_account_iam_member.processing_wi",
-        "google_service_account_iam_member.producer_wi",
-        "kubernetes_service_account_v1.processing",
-        "kubernetes_service_account_v1.producer",
+      &&
+      alltrue([
+        for r in try(output.module_resources["module.streaming"], []) : contains([
+          "google_managed_kafka_cluster.kafka",
+          "google_managed_kafka_topic.recentchange_raw",
+          "google_project_iam_member.processing_kafka",
+          "google_project_iam_member.processing_secret_accessor",
+          "google_project_iam_member.producer_kafka",
+          "google_project_iam_member.producer_secret_accessor",
+          "google_secret_manager_secret.kafka_bootstrap",
+          "google_secret_manager_secret.kafka_bootstrap_mtls",
+          "google_secret_manager_secret.kafka_sasl_username",
+          "google_secret_manager_secret.kafka_sasl_username_processing",
+          "google_secret_manager_secret.wiki_user_agent",
+          "google_secret_manager_secret_version.kafka_bootstrap_mtls_v1",
+          "google_secret_manager_secret_version.kafka_bootstrap_v1",
+          "google_secret_manager_secret_version.kafka_sasl_username_processing_v1",
+          "google_secret_manager_secret_version.kafka_sasl_username_v1",
+          "google_secret_manager_secret_version.wiki_user_agent_v1",
+          "google_service_account.processing_sa",
+          "google_service_account.producer_sa",
+          "google_service_account_iam_member.processing_wi",
+          "google_service_account_iam_member.producer_wi",
+          "kubernetes_service_account_v1.processing",
+          "kubernetes_service_account_v1.producer",
+        ], r)
       ])
     )
-    error_message = "streaming module resources no longer match either the active or intentionally destroyed state."
+    error_message = "streaming module resources contain an unexpected shape."
   }
 
   assert {
@@ -112,8 +106,12 @@ run "streaming_state_matches_current_stack" {
   }
 
   assert {
-    condition     = output.module_resource_attributes["module.streaming"]["kubernetes_service_account_v1.producer"].metadata[0].namespace == "wikistream"
-    error_message = "streaming producer Kubernetes SA namespace drifted."
+    condition = (
+      try(output.module_resource_attributes["module.streaming"]["kubernetes_service_account_v1.producer"].metadata[0].namespace, "destroyed") == "wikistream"
+      ) || (
+      try(output.module_resource_attributes["module.streaming"]["kubernetes_service_account_v1.producer"].metadata[0].namespace, "destroyed") == "destroyed"
+    )
+    error_message = "streaming producer Kubernetes SA namespace drifted when SA exists."
   }
 
   assert {

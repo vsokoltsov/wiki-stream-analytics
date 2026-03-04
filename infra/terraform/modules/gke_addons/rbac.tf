@@ -1,3 +1,5 @@
+# NOTE: Intentionally destroyed in Mar 2026 for cost control.
+# Keep definition for later re-provisioning.
 resource "kubernetes_cluster_role_binding_v1" "gha_cluster_admin" {
   metadata {
     name = "gha-ci-cluster-admin"
@@ -15,4 +17,3 @@ resource "kubernetes_cluster_role_binding_v1" "gha_cluster_admin" {
     api_group = "rbac.authorization.k8s.io"
   }
 }
-

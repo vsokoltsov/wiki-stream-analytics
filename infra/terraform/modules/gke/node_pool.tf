@@ -1,3 +1,5 @@
+# NOTE: Intentionally destroyed in Mar 2026 for cost control.
+# Keep definition for later re-provisioning.
 resource "google_container_node_pool" "primary" {
   name     = "primary-pool"
   cluster  = google_container_cluster.gke.name
@@ -35,4 +37,3 @@ resource "google_container_node_pool" "primary" {
     max_unavailable = 1
   }
 }
-

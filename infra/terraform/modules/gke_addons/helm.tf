@@ -1,9 +1,12 @@
+# NOTE: Intentionally destroyed in Mar 2026 for cost control.
+# Keep definition for later re-provisioning.
 resource "helm_release" "cert_manager" {
   name       = "cert-manager"
   namespace  = kubernetes_namespace_v1.cert_manager.metadata[0].name
   repository = "https://charts.jetstack.io"
   chart      = "cert-manager"
   version    = var.cert_manager_version
+  timeout    = 1800
 
   set = [{
     name  = "installCRDs"
@@ -11,9 +14,12 @@ resource "helm_release" "cert_manager" {
   }]
 }
 
+# NOTE: Intentionally destroyed in Mar 2026 for cost control.
+# Keep definition for later re-provisioning.
 resource "helm_release" "flink_operator" {
   name      = "flink-kubernetes-operator"
   namespace = kubernetes_namespace_v1.flink_operator.metadata[0].name
+  timeout   = 1800
 
   repository = "https://downloads.apache.org/flink/flink-kubernetes-operator-${var.flink_operator_version}/"
   chart      = "flink-kubernetes-operator"
@@ -45,4 +51,3 @@ resource "helm_release" "secrets_store_csi" {
     value = "true"
   }]
 }
-

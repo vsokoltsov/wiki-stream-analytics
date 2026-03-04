@@ -1,3 +1,5 @@
+# NOTE: Intentionally destroyed in Mar 2026 for cost control.
+# Keep definition for later re-provisioning.
 resource "google_managed_kafka_cluster" "kafka" {
   provider   = google-beta
   cluster_id = "wiki-kafka"
@@ -17,6 +19,8 @@ resource "google_managed_kafka_cluster" "kafka" {
   }
 }
 
+# NOTE: Intentionally destroyed in Mar 2026 for cost control.
+# Keep definition for later re-provisioning.
 resource "google_managed_kafka_topic" "recentchange_raw" {
   provider = google-beta
   cluster  = google_managed_kafka_cluster.kafka.cluster_id
@@ -26,4 +30,3 @@ resource "google_managed_kafka_topic" "recentchange_raw" {
   partition_count    = 6
   replication_factor = 3
 }
-

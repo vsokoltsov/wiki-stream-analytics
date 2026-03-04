@@ -1,3 +1,5 @@
+# NOTE: Intentionally destroyed in Mar 2026 for cost control.
+# Keep definition for later re-provisioning.
 resource "google_container_cluster" "gke" {
   name     = "wiki-gke"
   location = var.region
@@ -30,4 +32,3 @@ resource "google_container_cluster" "gke" {
 
   deletion_protection = false
 }
-
