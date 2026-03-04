@@ -60,6 +60,151 @@ This approach better reflects modern production-grade data platforms where real-
 ![diagram](./docs/diagram_brief.png)
 
 
+## Structure
+
+```
+wiki-stream-analytics
+  ├── .dockerignore                                  <- Root Docker ignore rules for image builds
+  ├── .env.sample                                    <- Example local environment variables
+  ├── .gitattributes                                 <- Git attribute configuration
+  ├── .github                                        <- GitHub-specific automation config
+  │   └── workflows                                  <- CI/CD pipelines
+  │       ├── dbt-refresh.yaml                       <- Scheduled dbt refresh workflow
+  │       ├── dbt.yml                                <- dbt validation workflow
+  │       ├── ingestion.yml                          <- CI/CD for the ingestion module
+  │       ├── k8s.yml                                <- Helm/Kubernetes config verification workflow
+  │       ├── processing.yml                         <- CI/CD for the Flink processing module
+  │       ├── producer.yml                           <- CI/CD for the producer module
+  │       └── terraform.yml                          <- Terraform verification workflow
+  ├── .gitignore                                     <- Repository ignore rules
+  ├── .python-version                                <- Preferred Python version for local tooling
+  ├── Makefile                                       <- Common developer commands
+  ├── README.md                                      <- Top-level project overview and deployment notes
+  ├── dbt                                            <- Analytics transformation project
+  │   ├── README.md                                  <- dbt-specific documentation
+  │   ├── pyproject.toml                             <- dbt Python dependencies and tooling config
+  │   ├── uv.lock                                    <- Locked dbt dependency versions
+  │   └── wikistream_analytics                       <- Main dbt project
+  │       ├── README.md                              <- dbt project documentation
+  │       ├── analyses                               <- Optional ad hoc SQL analysis area
+  │       ├── dbt_project.yml                        <- dbt project configuration
+  │       ├── macros                                 <- Custom dbt macros
+  │       ├── models                                 <- Staging and mart models
+  │       │   ├── marts                              <- Final analytics-facing models
+  │       │   ├── sources.yml                        <- Source definitions and metadata
+  │       │   └── staging                            <- Staging-layer transformations
+  │       ├── packages.yml                           <- Declared dbt packages
+  │       ├── package-lock.yml                       <- Locked dbt package versions
+  │       ├── seeds                                  <- Static seed datasets
+  │       ├── snapshots                              <- Snapshot definitions
+  │       └── tests                                  <- dbt test definitions
+  ├── docker-compose.yaml                            <- Local multi-service development stack
+  ├── docs                                           <- Documentation assets and screenshots
+  │   ├── cover.png                                  <- Cover image for project docs/presentation
+  │   ├── dashboard_breakdown.png                    <- Dashboard screenshot
+  │   ├── dashboard_general.png                      <- Dashboard screenshot
+  │   ├── dashboard_timeframe.png                    <- Dashboard screenshot
+  │   └── diagram_brief.png                          <- High-level architecture diagram
+  ├── infra                                          <- Infrastructure code
+  │   ├── k8s                                        <- Helm charts for Kubernetes workloads
+  │   │   ├── README.md                              <- Kubernetes chart structure and usage guide
+  │   │   └── charts                                 <- Helm charts
+  │   │       ├── common                             <- Shared Helm helper/library chart
+  │   │       ├── edge-access                        <- Public service exposure chart
+  │   │       ├── wiki-processing                    <- Flink processing deployment chart
+  │   │       └── wiki-producer                      <- Producer deployment chart
+  │   └── terraform                                  <- Terraform root and reusable modules
+  │       ├── README.md                              <- Terraform stack documentation
+  │       ├── GITHUB_ACTIONS.md                      <- Terraform CI bootstrap notes
+  │       ├── analytics.tf                           <- Root wiring for analytics module
+  │       ├── backend.tf                             <- Remote state backend declaration
+  │       ├── bootstrap.tf                           <- Root wiring for bootstrap module
+  │       ├── ci_cd.tf                               <- Root wiring for CI/CD module
+  │       ├── data_lake.tf                           <- Root wiring for data lake module
+  │       ├── gke.tf                                 <- Root wiring for GKE cluster module
+  │       ├── gke_addons.tf                          <- Root wiring for post-cluster add-ons
+  │       ├── network.tf                             <- Root wiring for network module
+  │       ├── outputs.tf                             <- Root stack outputs
+  │       ├── providers.tf                           <- Terraform provider configuration
+  │       ├── streaming.tf                           <- Root wiring for streaming module
+  │       ├── variables.tf                           <- Root input variables
+  │       ├── terraform.tfvars.sample                <- Example Terraform variable values
+  │       ├── .terraform.lock.hcl                    <- Locked provider versions
+  │       ├── modules                                <- Business-oriented Terraform modules
+  │       │   ├── analytics                          <- BigQuery/Dataflow analytics infrastructure
+  │       │   ├── bootstrap                          <- Project API/service enablement
+  │       │   ├── ci_cd                              <- Artifact Registry, WIF, CI identities, CI IAM
+  │       │   ├── data_lake                          <- GCS/PubSub/raw landing zone resources
+  │       │   ├── gke                                <- Core GKE cluster infrastructure
+  │       │   ├── gke_addons                         <- Namespaces, operators, access add-ons
+  │       │   ├── network                            <- VPC/subnet/router/NAT resources
+  │       │   └── streaming                          <- Managed Kafka, runtime identities, secrets
+  │       └── tests                                  <- Native Terraform tests
+  ├── ingestion                                      <- Beam/Dataflow ingestion pipeline
+  │   ├── Dockerfile.dataflow                        <- Container image for Dataflow runtime
+  │   ├── Dockerfile.local                           <- Local ingestion container image
+  │   ├── __init__.py                                <- Package marker
+  │   ├── app.py                                     <- Local ingestion entrypoint
+  │   ├── cloudbuild.yaml                            <- Cloud Build config for ingestion image
+  │   ├── dataflow                                   <- Dataflow template metadata
+  │   │   └── metadata.json                          <- Flex template metadata
+  │   ├── dataflow.py                                <- Dataflow launcher entrypoint
+  │   ├── pipeline                                   <- Beam pipeline implementation
+  │   │   ├── deduplicate.py                         <- Deduplication transforms
+  │   │   ├── definition.py                          <- Pipeline assembly
+  │   │   ├── load.py                                <- BigQuery/load logic
+  │   │   ├── map_fns.py                             <- Beam mapping helpers
+  │   │   ├── parse.py                               <- Event parsing logic
+  │   │   ├── routing.py                             <- Event routing logic
+  │   │   └── stability.py                           <- File/object readiness and stability logic
+  │   ├── settings.py                                <- Ingestion runtime settings
+  │   └── tests                                      <- Unit and integration tests for ingestion
+  ├── processing                                     <- Flink stream-processing application
+  │   ├── Dockerfile                                 <- Processing runtime image
+  │   ├── __init__.py                                <- Package marker
+  │   ├── app.py                                     <- Flink job entrypoint and stream setup
+  │   ├── cloudbuild.yaml                            <- Cloud Build config for processing image
+  │   ├── jars                                       <- Flink/Kafka/GCS connector dependencies
+  │   │   ├── flink-connector-kafka-4.0.1-2.0.jar    <- Kafka connector
+  │   │   ├── flink-gs-fs-hadoop-2.0.1.jar           <- GCS filesystem plugin
+  │   │   ├── flink-sql-parquet-2.0.1.jar            <- Parquet support
+  │   │   ├── hadoop-auth-3.3.6.jar                  <- Hadoop dependency for GCS support
+  │   │   ├── hadoop-client-api-3.3.6.jar            <- Hadoop dependency for GCS support
+  │   │   ├── hadoop-client-runtime-3.3.6.jar        <- Hadoop dependency for GCS support
+  │   │   ├── hadoop-common-3.3.6.jar                <- Hadoop dependency for GCS support
+  │   │   ├── kafka-clients-3.9.1.jar                <- Kafka client library
+  │   │   ├── managed-kafka-auth-login-handler-1.0.6.jar <- GCP Kafka auth helper
+  │   │   └── pom.xml                                <- Maven descriptor for extra Java deps
+  │   ├── pipeline.py                                <- Flink sink/table pipeline definition
+  │   ├── settings.py                                <- Processing runtime settings
+  │   └── tests                                      <- Unit tests for processing logic
+  ├── producer                                       <- Wikimedia event producer application
+  │   ├── .dockerignore                              <- Producer image ignore rules
+  │   ├── Dockerfile                                 <- Producer runtime image
+  │   ├── __init__.py                                <- Package marker
+  │   ├── app.py                                     <- Producer process entrypoint
+  │   ├── cloudbuild.yaml                            <- Cloud Build config for producer image
+  │   ├── errors.py                                  <- Producer-specific exceptions
+  │   ├── kafka.py                                   <- Kafka producer construction/helpers
+  │   ├── protocols.py                               <- Internal protocol/type definitions
+  │   ├── service.py                                 <- Producer service orchestration
+  │   ├── settings.py                                <- Producer runtime settings
+  │   ├── tests                                      <- Unit and integration tests for producer
+  │   │   ├── sse_stub_server.py                     <- Local SSE stub for integration tests
+  │   │   ├── test_service.py                        <- Producer service unit tests
+  │   │   ├── test_service_integration.py            <- Producer service integration tests
+  │   │   └── test_wiki_client.py                    <- Wikimedia client tests
+  │   ├── token_provider.py                          <- Auth token support for Kafka/GCP auth
+  │   └── wiki_client.py                             <- Wikimedia SSE client
+  ├── pyproject.toml                                 <- Root Python project and dependency configuration
+  ├── scripts                                        <- Operational helper scripts
+  │   ├── bootstrap_terraform_ci_iam.sh              <- Bootstrap IAM for Terraform CI account
+  │   ├── dataflow-deploy.sh                         <- Helper script for Dataflow deployment
+  │   └── deploy_edge_access.sh                      <- Helper script for edge-access deployment
+  ├── setup.py                                       <- Python packaging entrypoint
+  └── uv.lock                                        <- Root locked Python dependency versions
+  ```
+
 ## Data Warehouse
 
 Data Warehouse Optimization
