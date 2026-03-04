@@ -30,6 +30,7 @@ jobs:
       DBT_UV_PROJECT_DIR: dbt
       DBT_PROJECT_REL_DIR: wikistream_analytics
       DBT_VARS: '{"lookback_days": 7}'
+      DBT_PROFILES_DIR: ${{ github.workspace }}/.dbt-profiles
 
     steps:
       - name: Checkout
@@ -53,11 +54,6 @@ jobs:
         uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
-
-      - name: Set DBT_PROFILES_DIR
-        shell: bash
-        run: |
-          echo "DBT_PROFILES_DIR=${RUNNER_TEMP}/dbt-profiles" >> "$GITHUB_ENV"
 
       - name: Write dbt profiles.yml (no keyfile)
         shell: bash
