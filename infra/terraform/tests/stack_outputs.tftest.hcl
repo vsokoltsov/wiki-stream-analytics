@@ -19,8 +19,9 @@ run "stack_outputs_match_current_state" {
   }
 
   assert {
-    condition = (
-      toset(keys(output.outputs)) == toset([
+    # Require core outputs and allow optional outputs to be absent after targeted destroy.
+    condition = alltrue([
+      for key in [
         "bq_dataset",
         "bq_destination_table_for_jobs",
         "bq_table",
@@ -39,43 +40,13 @@ run "stack_outputs_match_current_state" {
         "dataflow_templates_bucket_name",
         "dataflow_templates_uri",
         "dataflow_worker_sa_email",
-        "flink_public_ip",
-        "kafka_cluster_name",
         "pubsub_subscription",
         "pubsub_topic",
         "region",
         "workload_identity_provider",
-      ])
-      ) || (
-      toset(keys(output.outputs)) == toset([
-        "bq_dataset",
-        "bq_destination_table_for_jobs",
-        "bq_table",
-        "bq_table_fqn",
-        "bq_table_legacy_sql",
-        "bucket_name",
-        "ci_service_account_email",
-        "cloudbuild_staging_bucket_name",
-        "dataflow_staging_bucket_name",
-        "dataflow_staging_location",
-        "dataflow_staging_uri",
-        "dataflow_temp_bucket_name",
-        "dataflow_temp_location",
-        "dataflow_temp_uri",
-        "dataflow_template_dir",
-        "dataflow_templates_bucket_name",
-        "dataflow_templates_uri",
-        "dataflow_worker_sa_email",
-        "flink_public_ip",
-        "flink_state_bucket_name",
-        "kafka_cluster_name",
-        "pubsub_subscription",
-        "pubsub_topic",
-        "region",
-        "workload_identity_provider",
-      ])
-    )
-    error_message = "Root outputs no longer match either the pre-state-bucket or post-state-bucket contract."
+      ] : contains(keys(output.outputs), key)
+    ])
+    error_message = "Root outputs are missing required core values."
   }
 
   assert {
@@ -149,8 +120,13 @@ run "stack_outputs_match_current_state" {
   }
 
   assert {
-    condition     = output.outputs.flink_public_ip == "34.40.47.43"
-    error_message = "flink_public_ip output drifted from the applied state."
+    # Optional after destroying GKE addons/LB resources.
+    condition = (
+      try(output.outputs.flink_public_ip, null) == null
+      ) || (
+      try(output.outputs.flink_public_ip, null) == "34.40.47.43"
+    )
+    error_message = "flink_public_ip output drifted when present."
   }
 
   assert {
@@ -164,8 +140,13 @@ run "stack_outputs_match_current_state" {
   }
 
   assert {
-    condition     = output.outputs.kafka_cluster_name == "projects/wiki-stream-analytics/locations/europe-west3/clusters/wiki-kafka"
-    error_message = "kafka_cluster_name output drifted from the applied state."
+    # Optional after destroying managed Kafka resources.
+    condition = (
+      try(output.outputs.kafka_cluster_name, null) == null
+      ) || (
+      try(output.outputs.kafka_cluster_name, null) == "projects/wiki-stream-analytics/locations/europe-west3/clusters/wiki-kafka"
+    )
+    error_message = "kafka_cluster_name output drifted when present."
   }
 
   assert {
