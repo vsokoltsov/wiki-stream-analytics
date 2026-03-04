@@ -339,6 +339,22 @@ Rationale
 
 If usage patterns evolve (e.g., BI dashboards with heavy repeated queries), marts can be materialized as partitioned & clustered tables.
 
+## Local setup
+
+You can run parts of the stack locally with `docker compose`, but this project is not fully local-first.
+Core cloud resources must still exist in GCP before local apps can work end-to-end, especially:
+* Google Cloud Storage (GCS) buckets
+* BigQuery datasets/tables
+* Pub/Sub topics/subscriptions
+
+Short local run flow:
+1. Provision infrastructure in GCP first (at minimum via `terraform -chdir=infra/terraform apply`).
+2. Authenticate locally with GCP credentials (`gcloud auth application-default login`), or export a service account key path via `GOOGLE_APPLICATION_CREDENTIALS`.
+3. Create local env file from template (`cp .env.sample .env`) and set required values (project, region, bucket/topic/table names, etc.).
+4. Start local services with `docker compose up --build`.
+
+Use this mode for development and validation; production-like execution still depends on provisioned GCP infrastructure.
+
 ## Deployment
 
 ### Prerequisites
