@@ -1,5 +1,12 @@
 # Wikimedia Stream Analytics
 
+[![CI (dbt)](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/dbt.yml/badge.svg)](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/dbt.yml)
+[![CI (processing)](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/processing.yml/badge.svg)](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/processing.yml)
+[![CI (ingestion)](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/ingestion.yml/badge.svg)](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/ingestion.yml)
+[![CI (producer)](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/producer.yml/badge.svg)](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/producer.yml)
+[![Kubernetes Config](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/k8s.yml/badge.svg)](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/k8s.yml)
+[![Terraform](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/terraform.yml/badge.svg)](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/terraform.yml)
+
 ![logo](./docs/cover.png)
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
