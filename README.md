@@ -55,11 +55,6 @@ The Wikimedia RecentChange feed produces a continuous, unbounded stream of event
 
 This approach better reflects modern production-grade data platforms where real-time ingestion, event-driven processing, and scalable stream computation are required.
 
-## Dashboard
-
-* [Looker](https://lookerstudio.google.com/reporting/3808acbe-89ec-47d7-a416-5e74c20fa432)
-
-
 ## Diagram
 
 ![diagram](./docs/diagram_brief.png)
@@ -233,3 +228,13 @@ Necessary environment variables are:
   * `STAGING_LOCATION`
   * `TEMPLATE_GCS`
   * `TEMP_LOCATION`
+  
+## Dashboard
+
+* [Looker](https://lookerstudio.google.com/reporting/3808acbe-89ec-47d7-a416-5e74c20fa432)
+
+![](./docs/dashboard_general.png)
+
+![](./docs/dashboard_timeframe.png)
+
+![](./docs/dashboard_breakdown.png)
