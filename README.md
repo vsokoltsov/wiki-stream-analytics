@@ -362,6 +362,49 @@ Short local run flow:
 
 Use this mode for development and validation; production-like execution still depends on provisioned GCP infrastructure.
 
+## Testing
+
+Python tests are executed with `pytest` through `uv`. The same command pattern is used in the GitHub Actions workflows for `producer`, `processing`, and `ingestion`: install the relevant dependency groups with `uv sync`, then run the test subset with a pytest marker.
+
+### Prepare the environment
+
+Install the dependencies for the app you want to test together with the shared developer tooling:
+
+```bash
+uv sync --group producer --group dev --frozen
+uv sync --group processing --group dev --frozen
+uv sync --group ingestion --group dev --frozen
+```
+
+### Run tests locally
+
+The following examples mirror the commands from `.github/workflows/producer.yml`, `.github/workflows/processing.yml`, and `.github/workflows/ingestion.yml`:
+
+```bash
+uv run pytest ./producer/tests/ -m unit -q
+uv run pytest ./producer/tests/ -m integration -q
+
+uv run pytest ./processing/tests/ -m unit -q
+uv run pytest ./processing/tests/ -m integration -q
+
+uv run pytest ./ingestion/tests/ -m unit -q
+uv run pytest ./ingestion/tests/ -m integration -q
+```
+
+If you want to run the full test suite for one app without filtering by marker, you can drop the `-m ...` flag, for example:
+
+```bash
+uv run pytest ./producer/tests/ -q
+```
+
+## Scripts
+
+The `scripts/` directory contains operational helpers for recurring infrastructure and deployment tasks:
+
+* `scripts/bootstrap_terraform_ci_iam.sh` grants the Terraform CI service account the project-level IAM roles required by the GitHub Actions workflows, such as read access to IAM, Pub/Sub, Secret Manager, Managed Kafka, and admin access to storage.
+* `scripts/dataflow-deploy.sh` builds the ingestion image with Cloud Build and then starts a Dataflow Flex Template job using the configured project, buckets, subscription, BigQuery table, and container image settings.
+* `scripts/deploy_edge_access.sh` reads the Flink public IP from Terraform outputs and deploys or updates the `edge-access` Helm chart so the external load balancer points at that IP.
+
 ## Deployment
 
 ### Prerequisites

@@ -107,9 +107,6 @@ services:
       PYFLINK_PYTHON: /opt/venv/bin/python
       PYFLINK_DRIVER_PYTHON: /opt/venv/bin/python
 
-      # GCS sink output
-      GCS_SINK_PATH: "gs://YOUR_BUCKET/curated/wikimedia/recentchange"
-
       # Google credentials (Application Default Credentials via key file)
       GOOGLE_APPLICATION_CREDENTIALS: "/var/secrets/google/gcp-service-account.json"
 
