@@ -7,7 +7,7 @@
 [![Kubernetes Config](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/k8s.yml/badge.svg)](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/k8s.yml)
 [![Terraform](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/terraform.yml/badge.svg)](https://github.com/vsokoltsov/wiki-stream-analytics/actions/workflows/terraform.yml)
 
-![logo](./docs/cover.png)
+![logo](./docs/cover_stream.png)
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![Apache Beam](https://img.shields.io/badge/Apache%20Beam-2.61.0-FC4C02?logo=apache&logoColor=white)
